@@ -1,0 +1,31 @@
+{
+  "name": "pdf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.12.4",
+    "express": "^4.12.4",
+    "mongodb": "^2.0.31",
+    "multer": "^0.1.8",
+    "path": "^0.4.9",
+    "phprocess": "^0.9.0",
+    "relative": "^1.0.1",
+    "underscore": "^1.8.3",
+    "ws": "^0.7.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/futurist/pdfsign.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/futurist/pdfsign/issues"
+  },
+  "homepage": "https://github.com/futurist/pdfsign"
+}
