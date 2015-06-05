@@ -14,13 +14,13 @@
     }
   </style>
 
-  <link rel="stylesheet" href="build/components/pdf_viewer.css">
+  <link rel="stylesheet" href="../../build/components/pdf_viewer.css">
 
   <!-- for legacy browsers -->
   <script src="zepto.js"></script>
-  <script src="build/components/compatibility.js"></script>
-  <script src="build/pdf.js"></script>
-  <script src="build/components/pdf_viewer.js"></script>
+  <script src="../../build/components/compatibility.js"></script>
+  <script src="../../build/pdf.js"></script>
+  <script src="../../build/components/pdf_viewer.js"></script>
 </head>
 
 <body tabindex="1">
@@ -29,12 +29,17 @@
   </div>
 
   <script type="text/javascript">
-  var PDFURL = 'mongodb.pdf';
+  var PDFURL = '../../mongodb.pdf';
   var con = $('#viewerContainer');
   //var pdfViewer = new PDFJS.PDFViewer({ container:con.get(0) });
 
 
-var LS = {
+var PDFViewerApplication = {
+
+
+
+  //linkService start
+
 
     get page() {
       console.log(this);
@@ -247,34 +252,72 @@ var LS = {
     }
   },
 
+  //linkService End
 
 
 
 
-}
 
 
-    console.log(this);
+  initialBookmark: document.location.hash.substring(1),
+  initialized: false,
+  fellback: false,
+  pdfDocument: null,
+  sidebarOpen: false,
+  printing: false,
+  /** @type {PDFViewer} */
+  pdfViewer: null,
+  /** @type {PDFThumbnailViewer} */
+  pdfThumbnailViewer: null,
+  /** @type {PDFRenderingQueue} */
+  pdfRenderingQueue: null,
+  pageRotation: 0,
+  updateScaleControls: true,
+  isInitialViewSet: false,
+  animationStartedPromise: null,
+  mouseScrollTimeStamp: 0,
+  mouseScrollDelta: 0,
+  preferenceSidebarViewOnLoad: "NONE",
+  preferencePdfBugEnabled: false,
+  preferenceShowPreviousViewOnLoad: true,
+  isViewerEmbedded: (window.parent !== window),
+  url: '',
+
+  // called once when the document is loaded
+  initialize: function pdfViewInitialize() {
  
     var container = document.getElementById('viewerContainer');
     var viewer = document.getElementById('viewer');
     this.pdfViewer = new PDFJS.PDFViewer({
       container: container,
       viewer: viewer,
-      linkService: LS
+      linkService: this
     });
  
 
-  container.addEventListener('pagesinit', function () {
-    //pdfViewer.currentScale = 1;
-    pdfViewer.currentScaleValue = 'page-width';
-  });
+    container.addEventListener('pagesinit', function () {
+      //pdfViewer.currentScale = 1;
+      this.pdfViewer.currentScaleValue = 'page-width';
+    });
 
 
-  PDFJS.getDocument(PDFURL).then(function  (pdf) {
+    PDFJS.getDocument(PDFURL).then(function  (pdf) {
+      this.load(pdf);
+    });
 
-    pdfViewer.setDocument(pdf);
-  });
+  },
+
+  load: function (pdfDocument) {
+    this.pdfDocument = pdfDocument;
+    this.pdfViewer.setDocument(pdfDocument);
+  },
+
+
+}
+
+window.PDFView = PDFViewerApplication;
+window.PDFView.initialize();
+
   </script>
 </body>
 </html>
