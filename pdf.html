@@ -12,6 +12,16 @@
       margin: 0;
       padding: 0;
     }
+    #viewerContainer {
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      position: absolute;
+      top: 32px;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      outline: none;
+    }
     #documentPropertiesOverlay{
       position: absolute;
     }
@@ -222,7 +232,7 @@ var PDFViewerApplication = {
     var container = document.getElementById('viewerContainer');
     var viewer = document.getElementById('viewer');
 
-    
+
     var pdfRenderingQueue = new PDFJS.PDFRenderingQueue();
     pdfRenderingQueue.onIdle = this.cleanup.bind(this);
     this.pdfRenderingQueue = pdfRenderingQueue;
@@ -476,7 +486,71 @@ var PDFViewerApplication = {
       });
     });
 
+    pagesPromise.then(function() {
+      if (self.supportsPrinting) {
+        pdfDocument.getJavaScript().then(function(javaScript) {
+          if (javaScript.length) {
+            console.warn('Warning: JavaScript is not supported');
+            self.fallback(PDFJS.UNSUPPORTED_FEATURES.javaScript);
+          }
+          // Hack to support auto printing.
+          var regex = /\bprint\s*\(/g;
+          for (var i = 0, ii = javaScript.length; i < ii; i++) {
+            var js = javaScript[i];
+            if (js && regex.test(js)) {
+              setTimeout(function() {
+                window.print();
+              });
+              return;
+            }
+          }
+        });
+      }
+    });
 
+    // outline depends on pagesRefMap
+    var promises = [pagesPromise, this.animationStartedPromise];
+    Promise.all(promises).then(function() {
+
+
+    });
+
+
+    pdfDocument.getMetadata().then(function(data) {
+      var info = data.info, metadata = data.metadata;
+      self.documentInfo = info;
+      self.metadata = metadata;
+
+      // Provides some basic debug information
+      console.log('PDF ' + pdfDocument.fingerprint + ' [' +
+                  info.PDFFormatVersion + ' ' + (info.Producer || '-').trim() +
+                  ' / ' + (info.Creator || '-').trim() + ']' +
+                  ' (PDF.js: ' + (PDFJS.version || '-') +
+                  (!PDFJS.disableWebGL ? ' [WebGL]' : '') + ')');
+
+      var pdfTitle;
+      if (metadata && metadata.has('dc:title')) {
+        var title = metadata.get('dc:title');
+        // Ghostscript sometimes return 'Untitled', sets the title to 'Untitled'
+        if (title !== 'Untitled') {
+          pdfTitle = title;
+        }
+      }
+
+      if (!pdfTitle && info && info['Title']) {
+        pdfTitle = info['Title'];
+      }
+
+      if (pdfTitle) {
+        self.setTitle(pdfTitle + ' - ' + document.title);
+      }
+
+      if (info.IsAcroFormPresent) {
+        console.warn('Warning: AcroForm/XFA is not supported');
+        self.fallback(PDFJS.UNSUPPORTED_FEATURES.forms);
+      }
+
+    });
 
 
   },
@@ -515,6 +589,72 @@ var PDFViewerApplication = {
 
 
 
+  download: function pdfViewDownload() {
+    function downloadByUrl() {
+      downloadManager.downloadUrl(url, filename);
+    }
+
+    var url = this.url.split('#')[0];
+    var filename = getPDFFileNameFromURL(url);
+    var downloadManager = new DownloadManager();
+    downloadManager.onerror = function (err) {
+      // This error won't really be helpful because it's likely the
+      // fallback won't work either (or is already open).
+      PDFViewerApplication.error('PDF failed to download.');
+    };
+
+    if (!this.pdfDocument) { // the PDF is not ready yet
+      downloadByUrl();
+      return;
+    }
+
+    if (!this.downloadComplete) { // the PDF is still downloading
+      downloadByUrl();
+      return;
+    }
+
+    this.pdfDocument.getData().then(
+      function getDataSuccess(data) {
+        var blob = PDFJS.createBlob(data, 'application/pdf');
+        downloadManager.download(blob, url, filename);
+      },
+      downloadByUrl // Error occurred try downloading with just the url.
+    ).then(null, downloadByUrl);
+  },
+
+
+  download: function pdfViewDownload() {
+    function downloadByUrl() {
+      downloadManager.downloadUrl(url, filename);
+    }
+
+    var url = this.url.split('#')[0];
+    var filename = getPDFFileNameFromURL(url);
+    var downloadManager = new DownloadManager();
+    downloadManager.onerror = function (err) {
+      // This error won't really be helpful because it's likely the
+      // fallback won't work either (or is already open).
+      PDFViewerApplication.error('PDF failed to download.');
+    };
+
+    if (!this.pdfDocument) { // the PDF is not ready yet
+      downloadByUrl();
+      return;
+    }
+
+    if (!this.downloadComplete) { // the PDF is still downloading
+      downloadByUrl();
+      return;
+    }
+
+    this.pdfDocument.getData().then(
+      function getDataSuccess(data) {
+        var blob = PDFJS.createBlob(data, 'application/pdf');
+        downloadManager.download(blob, url, filename);
+      },
+      downloadByUrl // Error occurred try downloading with just the url.
+    ).then(null, downloadByUrl);
+  },
 
 
 
@@ -630,6 +770,7 @@ function updateViewarea() {
 }
 
 window.addEventListener('updateviewarea', function (evt) {
+  console.log(evt);
   if (!PDFViewerApplication.initialized) {
     return;
   }
@@ -648,6 +789,7 @@ window.addEventListener('updateviewarea', function (evt) {
   });
   var href =
     PDFViewerApplication.pdfLinkService.getAnchorUrl(location.pdfOpenParams);
+  console.log(href);
   //document.getElementById('viewBookmark').href = href;
 
   // Update the current bookmark in the browsing history.
@@ -812,19 +954,7 @@ window.addEventListener('keydown', function keydown(evt) {
   if (cmd === 1 || cmd === 8 || cmd === 5 || cmd === 12) {
     // either CTRL or META key with optional SHIFT.
     switch (evt.keyCode) {
-      case 70: // f
-        if (!PDFViewerApplication.supportsIntegratedFind) {
-          PDFViewerApplication.findBar.open();
-          handled = true;
-        }
-        break;
-      case 71: // g
-        if (!PDFViewerApplication.supportsIntegratedFind) {
-          PDFViewerApplication.findBar.dispatchEvent('again',
-                                                     cmd === 5 || cmd === 12);
-          handled = true;
-        }
-        break;
+
       case 61: // FF/Mac '='
       case 107: // FF '+' and '='
       case 187: // Chrome '+'
@@ -866,20 +996,6 @@ window.addEventListener('keydown', function keydown(evt) {
     }
   }
 
-  // CTRL+ALT or Option+Command
-  if (cmd === 3 || cmd === 10) {
-    switch (evt.keyCode) {
-      case 80: // p
-        PDFViewerApplication.requestPresentationMode();
-        handled = true;
-        break;
-      case 71: // g
-        // focuses input#pageNumber field
-        document.getElementById('pageNumber').select();
-        handled = true;
-        break;
-    }
-  }
 
   if (handled) {
     evt.preventDefault();

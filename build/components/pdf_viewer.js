@@ -24,7 +24,6 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-(function pdfViewerWrapper() {
   'use strict';
 
 
@@ -161,35 +160,36 @@ function scrollIntoView(element, spot) {
  * Helper function to start monitoring the scroll event and converting them into
  * PDF.js friendly one: with scroll debounce and scroll direction.
  */
-function watchScroll(viewAreaElement, callback) {
-  var debounceScroll = function debounceScroll(evt) {
-    if (rAF) {
-      return;
-    }
-    // schedule an invocation of scroll for next animation frame.
-    rAF = window.requestAnimationFrame(function viewAreaElementScrolled() {
-      rAF = null;
+ function watchScroll(viewAreaElement, callback) {
+   var debounceScroll = function debounceScroll(evt) {
+     if (rAF) {
+       return;
+     }
+     // schedule an invocation of scroll for next animation frame.
+     rAF = window.requestAnimationFrame(function viewAreaElementScrolled() {
+       rAF = null;
 
-      var currentY = viewAreaElement.scrollTop;
-      var lastY = state.lastY;
-      if (currentY !== lastY) {
-        state.down = currentY > lastY;
-      }
-      state.lastY = currentY;
-      callback(state);
-    });
-  };
+       var currentY = viewAreaElement.scrollTop;
+       var lastY = state.lastY;
+       if (currentY !== lastY) {
+         state.down = currentY > lastY;
+       }
+       state.lastY = currentY;
+       callback(state);
+     });
+   };
 
-  var state = {
-    down: true,
-    lastY: viewAreaElement.scrollTop,
-    _eventHandler: debounceScroll
-  };
+   var state = {
+     down: true,
+     lastY: viewAreaElement.scrollTop,
+     _eventHandler: debounceScroll
+   };
 
-  var rAF = null;
-  viewAreaElement.addEventListener('scroll', debounceScroll, true);
-  return state;
-}
+   var rAF = null;
+   viewAreaElement.addEventListener('scroll', debounceScroll, true);
+   return state;
+ }
+
 
 /**
  * Helper function to parse query string (e.g. ?param1=value&parm2=...).
@@ -2526,6 +2526,7 @@ var PDFViewer = (function pdfViewer() {
       this._updateLocation(firstPage);
 
       this.updateInProgress = false;
+      console.log(2134);
 
       var event = document.createEvent('UIEvents');
       event.initUIEvent('updateviewarea', true, true, window, 0);
@@ -3083,7 +3084,7 @@ var PDFHistory = (function () {
   PDFJS.PDFHistory = PDFHistory;
 
   PDFJS.getFileName = getFileName;
-}).call((typeof window === 'undefined') ? this : window);
+
 
 
 
