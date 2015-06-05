@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html dir="ltr" mozdisallowselectionprint moznomarginboxes>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="google" content="notranslate">
+  <title>PDF.js viewer using built components</title>
+
+  <style>
+    body {
+      background-color: #808080;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+
+  <link rel="stylesheet" href="build/components/pdf_viewer.css">
+
+  <!-- for legacy browsers -->
+  <script src="zepto.js"></script>
+  <script src="build/components/compatibility.js"></script>
+  <script src="build/pdf.js"></script>
+  <script src="build/components/pdf_viewer.js"></script>
+</head>
+
+<body tabindex="1">
+  <div id="viewerContainer">
+    <div id="viewer" class="pdfViewer"></div>
+  </div>
+
+  <script type="text/javascript">
+  var PDFURL = 'mongodb.pdf';
+  var con = $('#viewerContainer');
+  //var pdfViewer = new PDFJS.PDFViewer({ container:con.get(0) });
+
+
+var LS = {
+
+    get page() {
+      console.log(this);
+      return this.pdfViewer.currentPageNumber;
+    },
+    /**
+     * @param {number} value
+     */
+    set page(value) {
+      this.pdfViewer.currentPageNumber = value;
+    },
+
+    cachePageRef: function (pageNum, pageRef) {},
+
+    getDestinationHash: function pdfViewGetDestinationHash(dest) {
+    if (typeof dest === 'string') {
+      return this.getAnchorUrl('#' + escape(dest));
+    }
+    if (dest instanceof Array) {
+      var destRef = dest[0]; // see navigateTo method for dest format
+      var pageNumber = destRef instanceof Object ?
+        this.pagesRefMap[destRef.num + ' ' + destRef.gen + ' R'] :
+        (destRef + 1);
+      if (pageNumber) {
+        var pdfOpenParams = this.getAnchorUrl('#page=' + pageNumber);
+        var destKind = dest[1];
+        if (typeof destKind === 'object' && 'name' in destKind &&
+            destKind.name === 'XYZ') {
+          var scale = (dest[4] || this.currentScaleValue);
+          var scaleNumber = parseFloat(scale);
+          if (scaleNumber) {
+            scale = scaleNumber * 100;
+          }
+          pdfOpenParams += '&zoom=' + scale;
+          if (dest[2] || dest[3]) {
+            pdfOpenParams += ',' + (dest[2] || 0) + ',' + (dest[3] || 0);
+          }
+        }
+        return pdfOpenParams;
+      }
+    }
+    return '';
+  },
+
+  getAnchorUrl: function getAnchorUrl(anchor) {
+    return anchor;
+  },
+  navigateTo: function pdfViewNavigateTo(dest) {
+    var destString = '';
+    var self = LS;
+
+    var goToDestination = function(destRef) {
+      self.pendingRefStr = null;
+      // dest array looks like that: <page-ref> </XYZ|FitXXX> <args..>
+      var pageNumber = destRef instanceof Object ?
+        self.pagesRefMap[destRef.num + ' ' + destRef.gen + ' R'] :
+        (destRef + 1);
+      if (pageNumber) {
+        if (pageNumber > self.pagesCount) {
+          pageNumber = self.pagesCount;
+        }
+        self.pdfViewer.scrollPageIntoView(pageNumber, dest);
+
+        // Update the browsing history.
+        PDFHistory.push({ dest: dest, hash: destString, page: pageNumber });
+      } else {
+        self.pdfDocument.getPageIndex(destRef).then(function (pageIndex) {
+          var pageNum = pageIndex + 1;
+          self.pagesRefMap[destRef.num + ' ' + destRef.gen + ' R'] = pageNum;
+          goToDestination(destRef);
+        });
+      }
+    };
+
+    var destinationPromise;
+    if (typeof dest === 'string') {
+      destString = dest;
+      destinationPromise = this.pdfDocument.getDestination(dest);
+    } else {
+      destinationPromise = Promise.resolve(dest);
+    }
+    destinationPromise.then(function(destination) {
+      dest = destination;
+      if (!(destination instanceof Array)) {
+        return; // invalid destination
+      }
+      goToDestination(destination[0]);
+    });
+  },
+
+  executeNamedAction: function pdfViewExecuteNamedAction(action) {
+    // See PDF reference, table 8.45 - Named action
+    switch (action) {
+      case 'GoToPage':
+        document.getElementById('pageNumber').focus();
+        break;
+
+      case 'GoBack':
+        PDFHistory.back();
+        break;
+
+      case 'GoForward':
+        PDFHistory.forward();
+        break;
+
+      case 'Find':
+        if (!this.supportsIntegratedFind) {
+          this.findBar.toggle();
+        }
+        break;
+
+      case 'NextPage':
+        this.page++;
+        break;
+
+      case 'PrevPage':
+        this.page--;
+        break;
+
+      case 'LastPage':
+        this.page = this.pagesCount;
+        break;
+
+      case 'FirstPage':
+        this.page = 1;
+        break;
+
+      default:
+        break; // No action according to spec
+    }
+  },
+
+
+
+  setHash: function pdfViewSetHash(hash) {
+    if (!this.isInitialViewSet) {
+      this.initialBookmark = hash;
+      return;
+    }
+    if (!hash) {
+      return;
+    }
+
+    if (hash.indexOf('=') >= 0) {
+      var params = this.parseQueryString(hash);
+      // borrowing syntax from "Parameters for Opening PDF Files"
+      if ('nameddest' in params) {
+        PDFHistory.updateNextHashParam(params.nameddest);
+        this.navigateTo(params.nameddest);
+        return;
+      }
+      var pageNumber, dest;
+      if ('page' in params) {
+        pageNumber = (params.page | 0) || 1;
+      }
+      if ('zoom' in params) {
+        // Build the destination array.
+        var zoomArgs = params.zoom.split(','); // scale,left,top
+        var zoomArg = zoomArgs[0];
+        var zoomArgNumber = parseFloat(zoomArg);
+
+        if (zoomArg.indexOf('Fit') === -1) {
+          // If the zoomArg is a number, it has to get divided by 100. If it's
+          // a string, it should stay as it is.
+          dest = [null, { name: 'XYZ' },
+                  zoomArgs.length > 1 ? (zoomArgs[1] | 0) : null,
+                  zoomArgs.length > 2 ? (zoomArgs[2] | 0) : null,
+                  (zoomArgNumber ? zoomArgNumber / 100 : zoomArg)];
+        } else {
+          if (zoomArg === 'Fit' || zoomArg === 'FitB') {
+            dest = [null, { name: zoomArg }];
+          } else if ((zoomArg === 'FitH' || zoomArg === 'FitBH') ||
+                     (zoomArg === 'FitV' || zoomArg === 'FitBV')) {
+            dest = [null, { name: zoomArg },
+                    zoomArgs.length > 1 ? (zoomArgs[1] | 0) : null];
+          } else if (zoomArg === 'FitR') {
+            if (zoomArgs.length !== 5) {
+              console.error('pdfViewSetHash: ' +
+                            'Not enough parameters for \'FitR\'.');
+            } else {
+              dest = [null, { name: zoomArg },
+                      (zoomArgs[1] | 0), (zoomArgs[2] | 0),
+                      (zoomArgs[3] | 0), (zoomArgs[4] | 0)];
+            }
+          } else {
+            console.error('pdfViewSetHash: \'' + zoomArg +
+                          '\' is not a valid zoom value.');
+          }
+        }
+      }
+      if (dest) {
+        this.pdfViewer.scrollPageIntoView(pageNumber || this.page, dest);
+      } else if (pageNumber) {
+        this.page = pageNumber; // simple page
+      }
+      if ('pagemode' in params) {
+        if (params.pagemode === 'thumbs' || params.pagemode === 'bookmarks' ||
+            params.pagemode === 'attachments') {
+          this.switchSidebarView((params.pagemode === 'bookmarks' ?
+                                  'outline' : params.pagemode), true);
+        } else if (params.pagemode === 'none' && this.sidebarOpen) {
+          document.getElementById('sidebarToggle').click();
+        }
+      }
+    } else if (/^\d+$/.test(hash)) { // page number
+      this.page = hash;
+    } else { // named destination
+      PDFHistory.updateNextHashParam(unescape(hash));
+      this.navigateTo(unescape(hash));
+    }
+  },
+
+
+
+
+
+}
+
+
+    console.log(this);
+ 
+    var container = document.getElementById('viewerContainer');
+    var viewer = document.getElementById('viewer');
+    this.pdfViewer = new PDFJS.PDFViewer({
+      container: container,
+      viewer: viewer,
+      linkService: LS
+    });
+ 
+
+  container.addEventListener('pagesinit', function () {
+    //pdfViewer.currentScale = 1;
+    pdfViewer.currentScaleValue = 'page-width';
+  });
+
+
+  PDFJS.getDocument(PDFURL).then(function  (pdf) {
+
+    pdfViewer.setDocument(pdf);
+  });
+  </script>
+</body>
+</html>
