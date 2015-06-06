@@ -185,10 +185,10 @@ function scrollIntoView(element, spot) {
      _eventHandler: debounceScroll
    };
 
-   viewAreaElement = document.querySelector('body');
+   //viewAreaElement = document.querySelector('body');
    var rAF = null;
-   //viewAreaElement.addEventListener('scroll', debounceScroll, true);
-   window.addEventListener('scroll', debounceScroll, true);
+   viewAreaElement.addEventListener('scroll', debounceScroll, true);
+   //window.addEventListener('scroll', debounceScroll, true);
 
    return state;
  }
@@ -2471,7 +2471,7 @@ var PDFViewer = (function pdfViewer() {
       pdfOpenParams += '&zoom=' + normalizedScaleValue;
       var currentPageView = this._pages[pageNumber - 1];
       var container = this.container;
-      container = document.querySelector('body');
+      //container = document.querySelector('body');
       var topLeft = currentPageView.getPagePoint(
         (container.scrollLeft - firstPage.x),
         (container.scrollTop - firstPage.y));

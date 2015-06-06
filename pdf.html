@@ -7,26 +7,31 @@
   <title>PDF.js viewer using built components</title>
 
   <style>
+    *{margin:0; padding: 0}
+    body,html{height:100%;}
     body {
       background-color: #808080;
       margin: 0;
       padding: 0;
+      overflow: hidden;
     }
     #viewerContainer {
-      /*overflow: auto;
+      overflow: auto;
       -webkit-overflow-scrolling: touch;
       position: absolute;
       top: 32px;
       right: 0;
       bottom: 0;
       left: 0;
-      outline: none;*/
+      outline: none;
     }
     #documentPropertiesOverlay{
       position: absolute;
+      display: none;
     }
     #passwordOverlay{
       position: absolute;
+      display: none;
     }
     #toolbar{
       position: fixed;
@@ -822,18 +827,20 @@ window.addEventListener('updateviewarea', function (evt) {
   }
 }, true);
 
-window.addEventListener('resize', function webViewerResize(evt) {
-  if (PDFViewerApplication.initialized &&
-      (document.getElementById('pageAutoOption').selected ||
-       /* Note: the scale is constant for |pageActualOption|. */
-       document.getElementById('pageFitOption').selected ||
-       document.getElementById('pageWidthOption').selected)) {
-    var selectedScale = document.getElementById('scaleSelect').value;
-    PDFViewerApplication.setScale(selectedScale, false);
-  }
-  updateViewarea();
 
-});
+// window.addEventListener('resize', function webViewerResize(evt) {
+//   if (PDFViewerApplication.initialized &&
+//       (document.getElementById('pageAutoOption').selected ||
+//        /* Note: the scale is constant for |pageActualOption|. */
+//        document.getElementById('pageFitOption').selected ||
+//        document.getElementById('pageWidthOption').selected)) {
+//     var selectedScale = document.getElementById('scaleSelect').value;
+//     PDFViewerApplication.setScale(selectedScale, false);
+//   }
+//   updateViewarea();
+
+// });
+
 
 window.addEventListener('hashchange', function webViewerHashchange(evt) {
   if (PDFViewerApplication.pdfHistory.isHashChangeUnlocked) {
