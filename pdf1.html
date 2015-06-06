@@ -2,7 +2,7 @@
 <html dir="ltr" mozdisallowselectionprint moznomarginboxes>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="google" content="notranslate">
   <title>PDF.js viewer using built components</title>
 
@@ -585,10 +585,42 @@ var PDFViewerApplication = {
       // Setting the default one.
       this.setScale(DEFAULT_SCALE, true);
     }
-    setTimeout(function(){updateViewarea(); }, 300);
   },
 
 
+
+  download: function pdfViewDownload() {
+    function downloadByUrl() {
+      downloadManager.downloadUrl(url, filename);
+    }
+
+    var url = this.url.split('#')[0];
+    var filename = getPDFFileNameFromURL(url);
+    var downloadManager = new DownloadManager();
+    downloadManager.onerror = function (err) {
+      // This error won't really be helpful because it's likely the
+      // fallback won't work either (or is already open).
+      PDFViewerApplication.error('PDF failed to download.');
+    };
+
+    if (!this.pdfDocument) { // the PDF is not ready yet
+      downloadByUrl();
+      return;
+    }
+
+    if (!this.downloadComplete) { // the PDF is still downloading
+      downloadByUrl();
+      return;
+    }
+
+    this.pdfDocument.getData().then(
+      function getDataSuccess(data) {
+        var blob = PDFJS.createBlob(data, 'application/pdf');
+        downloadManager.download(blob, url, filename);
+      },
+      downloadByUrl // Error occurred try downloading with just the url.
+    ).then(null, downloadByUrl);
+  },
 
 
   download: function pdfViewDownload() {
@@ -663,6 +695,8 @@ window.PDFView = PDFViewerApplication;
 PDFViewerApplication.initialize().then(webViewerInitialized);
 function webViewerInitialized() {
 
+  alert(1234);
+
   var queryString = document.location.search.substring(1);
   var params = parseQueryString(queryString);
   var file = 'file' in params ? params.file : DEFAULT_URL;
@@ -689,6 +723,7 @@ function webViewerInitialized() {
 
   document.getElementById('zoomOut').addEventListener('click',
     function() {
+      alert(1234);
       PDFViewerApplication.zoomOut();
     });
 
@@ -707,7 +742,6 @@ function webViewerInitialized() {
 
   document.getElementById('scaleSelect').addEventListener('change',
     function() {
-      document.body.focus();
       PDFViewerApplication.setScale(this.value, false);
   });
 
@@ -898,7 +932,6 @@ window.addEventListener('scalechange', function scalechange(evt) {
 
 window.addEventListener('pagechange', function pagechange(evt) {
   var page = evt.pageNumber;
-  console.log(page);
   if (evt.previousPageNumber !== page) {
     document.getElementById('pageNumber').value = page;
     if (PDFViewerApplication.sidebarOpen) {

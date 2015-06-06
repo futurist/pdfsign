@@ -335,7 +335,6 @@ var ViewHistory = (function ViewHistoryClosure() {
     _readFromStorage: function ViewHistory_readFromStorage() {
       return new Promise(function (resolve) {
 
-
         resolve(localStorage.getItem('database'));
       });
     },

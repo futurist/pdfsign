@@ -4648,7 +4648,6 @@ var PDFViewer = (function pdfViewer() {
         this._currentPageNumber = val;
         return;
       }
-
       var event = document.createEvent('UIEvents');
       event.initUIEvent('pagechange', true, true, window, 0);
       event.updateInProgress = this.updateInProgress;
