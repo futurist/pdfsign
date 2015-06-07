@@ -13,16 +13,21 @@
       background-color: #808080;
       margin: 0;
       padding: 0;
+      height: 100%;
       overflow: hidden;
+      width: 100%;
+      position: fixed;
     }
     #viewerContainer {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
-      position: absolute;
+      position: fixed;
       top: 32px;
       right: 0;
       bottom: 0;
       left: 0;
+      -webkit-height:calc(100%-32px);
+      height:calc(100%-32px);
       outline: none;
     }
     #documentPropertiesOverlay{
@@ -173,6 +178,47 @@
 
 
   <script type="text/javascript">
+
+
+  var keys = {37: 1, 38: 1, 39: 1, 40: 1};
+
+  function preventDefault(e) {
+    e = e || window.event;
+    if (e.preventDefault)
+        e.preventDefault();
+    e.returnValue = false;
+  }
+
+  function preventDefaultForScrollKeys(e) {
+      if (keys[e.keyCode]) {
+          preventDefault(e);
+          return false;
+      }
+  }
+
+  function disableScroll() {
+    if (window.addEventListener) // older FF
+        window.addEventListener('DOMMouseScroll', preventDefault, false);
+    window.onwheel = preventDefault; // modern standard
+    window.onmousewheel = document.onmousewheel = preventDefault; // older browsers, IE
+    window.ontouchmove  = preventDefault; // mobile
+    document.ontouchmove  = preventDefault; // mobile
+    document.body.onmousemove  = preventDefault; // mobile
+    document.onkeydown  = preventDefaultForScrollKeys;
+  }
+
+  function enableScroll() {
+      if (window.removeEventListener)
+          window.removeEventListener('DOMMouseScroll', preventDefault, false);
+      window.onmousewheel = document.onmousewheel = null;
+      window.onwheel = null;
+      window.ontouchmove = null;
+      document.ontouchmove = null;
+      document.body.onmousemove  = null; // mobile
+      document.onkeydown = null;
+  }
+  //disableScroll();
+
   var DEFAULT_URL = 'web/compressed.tracemonkey-pldi-09.pdf';
   var DEFAULT_SCALE_DELTA = 1.1;
   var MIN_SCALE = 0.25;
