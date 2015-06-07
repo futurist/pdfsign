@@ -38,6 +38,9 @@
       bottom: 0;
       left: 0;
     }
+    #mainCon .canOverlay canvas{
+      cursor: cell;
+    }
     #viewerContainer {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
@@ -1371,17 +1374,18 @@ window.addEventListener('afterprint', function afterPrint(evt) {
   var x = "red",
       y = 4;
   var page;
+var pageView;
 
   function init() {
       canvas = document.getElementById('canDrawer');
 
       var pv = PDFView.pdfViewer;
       var curpage = pv.currentPageNumber;
-      var pageView = pv.getPageView( curpage-1 );
+      pageView = pv.getPageView( curpage-1 );
       page = $('#page'+curpage);
       var off = page.offset();
-      canvas.width = $(window).width();
-      canvas.height = $(window).height();
+      canvas.width = parseFloat(page.get(0).style.width);
+      canvas.height = parseFloat(page.get(0).style.height);
       $('#drawer').css({marginLeft: Math.max(0,off.left) });
 
 
@@ -1455,7 +1459,7 @@ window.addEventListener('afterprint', function afterPrint(evt) {
       $.ajax({
           url:'http://1111hui.com:3000/pdf',
           type:'POST',
-          data:{type:"img", src:dataURL, pageWidth:page.width(), pageHeight:page.height()  }
+          data:{type:"img", src:dataURL, pageWidth:pageView.viewport.viewBox[2], pageHeight:pageView.viewport.viewBox[3]  }
       });
   }
 
