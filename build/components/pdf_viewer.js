@@ -2526,7 +2526,6 @@ var PDFViewer = (function pdfViewer() {
       if (!this.isInPresentationMode) {
         this.currentPageNumber = currentId;
       }
-      console.log(visiblePages);
 
       this._updateLocation(firstPage);
 

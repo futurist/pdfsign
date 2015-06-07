@@ -40,7 +40,57 @@
     }
     #toolbar{
       position: fixed;
+      text-align: center;
       top:0;
+      width: 100%;
+      font:0/0 Arial;
+    }
+    #toolbar input{
+      width: 34px;
+      border: none;
+      background:#cfcfcf;
+    }
+    #scaleSelectContainer{
+      display: none;
+    }
+    .splitToolbarButton{
+      float: left;
+    }
+    .splitToolbarButtonSeparator{
+      display: inline-block;
+    }
+    .toolbarRight {
+      float: right;
+    }
+    .pageIndi{
+      font:14px/1 Arial;
+      color:white;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate( -70%, -50%);
+    }
+    .hidden{
+      display: none;
+    }
+
+    .btn {
+      border:none;
+      margin:2px;
+      -webkit-border-radius: 4;
+      -moz-border-radius: 4;
+      border-radius: 4px;
+      font-family: Arial;
+      color: #424242;
+      font-size: 14px;
+      background: #cfcfcf;
+      padding: 4px 6px 4px 6px;
+      text-decoration: none;
+    }
+
+    .btn:focus {
+      background: #e3e3e3;
+      text-decoration: none;
     }
   </style>
 
@@ -65,50 +115,57 @@
   <div id="toolbar">
 
 
-    <div class="splitToolbarButton">
-      <button class="toolbarButton pageUp" title="Previous Page" id="previous" tabindex="13" data-l10n-id="previous">
-        <span data-l10n-id="previous_label">Previous</span>
+    <div class="splitToolbarButton pageBtn">
+      <button class="toolbarButton pageUp btn" title="Previous Page" id="previous" tabindex="13" data-l10n-id="previous">
+        <span data-l10n-id="previous_label">上页</span>
       </button>
       <div class="splitToolbarButtonSeparator"></div>
-      <button class="toolbarButton pageDown" title="Next Page" id="next" tabindex="14" data-l10n-id="next">
-        <span data-l10n-id="next_label">Next</span>
+      <button class="toolbarButton pageDown btn" title="Next Page" id="next" tabindex="14" data-l10n-id="next">
+        <span data-l10n-id="next_label">下页</span>
       </button>
     </div>
-    <label id="pageNumberLabel" class="toolbarLabel" for="pageNumber" data-l10n-id="page_label">Page: </label>
-    <input type="number" id="pageNumber" class="toolbarField pageNumber" value="1" size="4" min="1" tabindex="15">
-    <span id="numPages" class="toolbarLabel"></span>
+
+    <div class=" pageIndi">
+      <label id="pageNumberLabel" class="toolbarLabel" for="pageNumber" data-l10n-id="page_label"></label>
+      <input type="number" id="pageNumber" class="toolbarField pageNumber" value="1" size="4" min="1" tabindex="15">
+      <span id="numPages" class="toolbarLabel"></span>
+    </div>
 
 
+    <div class="toolbarRight" id="toolbarRight">
+        <div class="splitToolbarButton">
+          <button id="zoomOut" class="toolbarButton zoomOut btn" title="Zoom Out" tabindex="21" data-l10n-id="zoom_out">
+            <span data-l10n-id="zoom_out_label">缩小</span>
+          </button>
+          <div class="splitToolbarButtonSeparator"></div>
+          <button id="zoomPage" class="toolbarButton actual btn" title="页宽" tabindex="22">
+            <span data-scale='page-actual'>适应</span>
+            <span data-scale='page-width' class="hidden">实际</span>
+          </button>
+          <div class="splitToolbarButtonSeparator"></div>
+          <button id="zoomIn" class="toolbarButton zoomIn btn" title="Zoom In" tabindex="22" data-l10n-id="zoom_in">
+            <span data-l10n-id="zoom_in_label">放大</span>
+           </button>
+        </div>
+        <span id="scaleSelectContainer" class="dropdownToolbarButton">
+           <select id="scaleSelect" title="Zoom" tabindex="23" data-l10n-id="zoom">
+            <option id="pageAutoOption" title="" value="auto" selected="selected" data-l10n-id="page_scale_auto">Automatic Zoom</option>
+            <option id="pageActualOption" title="" value="page-actual" data-l10n-id="page_scale_actual">Actual Size</option>
+            <option id="pageFitOption" title="" value="page-fit" data-l10n-id="page_scale_fit">Fit Page</option>
+            <option id="pageWidthOption" title="" value="page-width" data-l10n-id="page_scale_width">Full Width</option>
+            <option id="customScaleOption" title="" value="custom"></option>
+            <option title="" value="0.5" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 50 }'>50%</option>
+            <option title="" value="0.75" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 75 }'>75%</option>
+            <option title="" value="1" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 100 }'>100%</option>
+            <option title="" value="1.25" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 125 }'>125%</option>
+            <option title="" value="1.5" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 150 }'>150%</option>
+            <option title="" value="2" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 200 }'>200%</option>
+            <option title="" value="3" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 300 }'>300%</option>
+            <option title="" value="4" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 400 }'>400%</option>
+          </select>
+        </span>
+      </div>
 
-
-              <div class="innerCenter" id="toolbarViewerMiddle">
-                  <div class="splitToolbarButton">
-                    <button id="zoomOut" class="toolbarButton zoomOut" title="Zoom Out" tabindex="21" data-l10n-id="zoom_out">
-                      <span data-l10n-id="zoom_out_label">Zoom Out</span>
-                    </button>
-                    <div class="splitToolbarButtonSeparator"></div>
-                    <button id="zoomIn" class="toolbarButton zoomIn" title="Zoom In" tabindex="22" data-l10n-id="zoom_in">
-                      <span data-l10n-id="zoom_in_label">Zoom In</span>
-                     </button>
-                  </div>
-                  <span id="scaleSelectContainer" class="dropdownToolbarButton">
-                     <select id="scaleSelect" title="Zoom" tabindex="23" data-l10n-id="zoom">
-                      <option id="pageAutoOption" title="" value="auto" selected="selected" data-l10n-id="page_scale_auto">Automatic Zoom</option>
-                      <option id="pageActualOption" title="" value="page-actual" data-l10n-id="page_scale_actual">Actual Size</option>
-                      <option id="pageFitOption" title="" value="page-fit" data-l10n-id="page_scale_fit">Fit Page</option>
-                      <option id="pageWidthOption" title="" value="page-width" data-l10n-id="page_scale_width">Full Width</option>
-                      <option id="customScaleOption" title="" value="custom"></option>
-                      <option title="" value="0.5" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 50 }'>50%</option>
-                      <option title="" value="0.75" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 75 }'>75%</option>
-                      <option title="" value="1" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 100 }'>100%</option>
-                      <option title="" value="1.25" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 125 }'>125%</option>
-                      <option title="" value="1.5" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 150 }'>150%</option>
-                      <option title="" value="2" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 200 }'>200%</option>
-                      <option title="" value="3" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 300 }'>300%</option>
-                      <option title="" value="4" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 400 }'>400%</option>
-                    </select>
-                  </span>
-                </div>
 
 
 </div>
@@ -180,6 +237,13 @@
   <script type="text/javascript">
 
 
+  var isMobile = ('DeviceOrientationEvent' in window || 'orientation' in window);
+  // But with my Chrome on windows, DeviceOrientationEvent == fct()
+  if (/Windows NT|Macintosh|Mac OS X|Linux/i.test(navigator.userAgent)) isMobile = false;
+  // My android have "linux" too
+  if (/Mobile/i.test(navigator.userAgent)) isMobile = true;
+
+
   var keys = {37: 1, 38: 1, 39: 1, 40: 1};
 
   function preventDefault(e) {
@@ -196,28 +260,29 @@
       }
   }
 
-  function disableScroll() {
-    if (window.addEventListener) // older FF
-        window.addEventListener('DOMMouseScroll', preventDefault, false);
-    window.onwheel = preventDefault; // modern standard
-    window.onmousewheel = document.onmousewheel = preventDefault; // older browsers, IE
-    window.ontouchmove  = preventDefault; // mobile
+  function disableScroll(el) {
+    if (el.addEventListener) // older FF
+        el.addEventListener('DOMMouseScroll', preventDefault, false);
+    el.onwheel = preventDefault; // modern standard
+    el.onmousewheel = document.onmousewheel = preventDefault; // older browsers, IE
+    el.ontouchmove  = preventDefault; // mobile
     document.ontouchmove  = preventDefault; // mobile
-    document.body.onmousemove  = preventDefault; // mobile
     document.onkeydown  = preventDefaultForScrollKeys;
+    el.onkeydown  = preventDefaultForScrollKeys;
   }
 
   function enableScroll() {
-      if (window.removeEventListener)
-          window.removeEventListener('DOMMouseScroll', preventDefault, false);
-      window.onmousewheel = document.onmousewheel = null;
-      window.onwheel = null;
-      window.ontouchmove = null;
+      if (el.removeEventListener)
+          el.removeEventListener('DOMMouseScroll', preventDefault, false);
+      el.onmousewheel = document.onmousewheel = null;
+      el.onwheel = null;
+      el.ontouchmove = null;
       document.ontouchmove = null;
-      document.body.onmousemove  = null; // mobile
       document.onkeydown = null;
+      el.onkeydown = null;
   }
-  //disableScroll();
+  //disableScroll( document.querySelector('#viewerContainer') );
+
 
   var DEFAULT_URL = 'web/compressed.tracemonkey-pldi-09.pdf';
   var DEFAULT_SCALE_DELTA = 1.1;
@@ -300,7 +365,8 @@ var PDFViewerApplication = {
       container: container,
       viewer: viewer,
       renderingQueue: pdfRenderingQueue,
-      linkService: this.pdfLinkService
+      linkService: this.pdfLinkService,
+      removePageBorders: isMobile
     });
     pdfRenderingQueue.setViewer(this.pdfViewer);
     this.pdfLinkService.setViewer(this.pdfViewer);
@@ -470,7 +536,7 @@ var PDFViewerApplication = {
     });
 
     var pagesCount = pdfDocument.numPages;
-    document.getElementById('numPages').textContent = 'of ' + pagesCount;
+    document.getElementById('numPages').textContent = '/' + pagesCount;
     document.getElementById('pageNumber').max = pagesCount;
 
 
@@ -737,6 +803,23 @@ function webViewerInitialized() {
       PDFViewerApplication.zoomIn();
     });
 
+  document.getElementById('zoomPage').addEventListener('click',
+    function() {
+      var z1=this.querySelectorAll('span')[0];
+      var z2=this.querySelectorAll('span')[1];
+      var obj;
+      if(z1.classList.contains('hidden')){
+        z1.classList.remove('hidden');
+        z2.classList.add('hidden');
+        obj=z1;
+      }else{
+        z2.classList.remove('hidden');
+        z1.classList.add('hidden');
+        obj=z2;
+      }
+      PDFViewerApplication.setScale(obj.dataset.scale);
+    });
+
 
   document.getElementById('zoomOut').addEventListener('click',
     function() {
@@ -874,18 +957,18 @@ window.addEventListener('updateviewarea', function (evt) {
 }, true);
 
 
-// window.addEventListener('resize', function webViewerResize(evt) {
-//   if (PDFViewerApplication.initialized &&
-//       (document.getElementById('pageAutoOption').selected ||
-//        /* Note: the scale is constant for |pageActualOption|. */
-//        document.getElementById('pageFitOption').selected ||
-//        document.getElementById('pageWidthOption').selected)) {
-//     var selectedScale = document.getElementById('scaleSelect').value;
-//     PDFViewerApplication.setScale(selectedScale, false);
-//   }
-//   updateViewarea();
+window.addEventListener('resize', function webViewerResize(evt) {
+  if (PDFViewerApplication.initialized &&
+      (document.getElementById('pageAutoOption').selected ||
+       /* Note: the scale is constant for |pageActualOption|. */
+       document.getElementById('pageFitOption').selected ||
+       document.getElementById('pageWidthOption').selected)) {
+    var selectedScale = document.getElementById('scaleSelect').value;
+    PDFViewerApplication.setScale(selectedScale, false);
+  }
+  updateViewarea();
 
-// });
+});
 
 
 window.addEventListener('hashchange', function webViewerHashchange(evt) {
@@ -951,7 +1034,6 @@ window.addEventListener('scalechange', function scalechange(evt) {
 
 window.addEventListener('pagechange', function pagechange(evt) {
   var page = evt.pageNumber;
-  console.log(page);
   if (evt.previousPageNumber !== page) {
     document.getElementById('pageNumber').value = page;
     if (PDFViewerApplication.sidebarOpen) {
