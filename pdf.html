@@ -18,10 +18,31 @@
       width: 100%;
       position: fixed;
     }
+    #mainCon {
+      position: absolute;
+      top: 32px;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      -webkit-height:calc(100%-32px);
+      height:calc(100%-32px);
+      outline: none;
+    }
+    #mainCon .canOverlay{
+      position: absolute;
+      display: none;
+      background: rgba(0,0,0,0.2);
+      z-index: 1001;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
     #viewerContainer {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
       position: fixed;
+      z-index:999;
       top: 32px;
       right: 0;
       bottom: 0;
@@ -107,8 +128,14 @@
 
 
 
+  <div id="mainCon">
+  <div id="drawer" class="canOverlay">
+    <canvas id="canDrawer"></canvas>
+    <div id="aa" style="position:absolute; width:2px; height:2px; background:red;"></div>
+  </div>
   <div id="viewerContainer">
     <div id="viewer" class="pdfViewer"></div>
+  </div>
   </div>
 
 
@@ -116,17 +143,25 @@
 
 
     <div class="splitToolbarButton pageBtn">
-      <button class="toolbarButton pageUp btn" title="Previous Page" id="previous" tabindex="13" data-l10n-id="previous">
-        <span data-l10n-id="previous_label">上页</span>
+      <button class="toolbarButton pageUp btn hidden" title="Previous Page" id="previous" tabindex="13">
+        <span>上页</span>
       </button>
       <div class="splitToolbarButtonSeparator"></div>
-      <button class="toolbarButton pageDown btn" title="Next Page" id="next" tabindex="14" data-l10n-id="next">
-        <span data-l10n-id="next_label">下页</span>
+      <button class="toolbarButton pageDown btn hidden" title="Next Page" id="next" tabindex="14">
+        <span>下页</span>
+      </button>
+
+      <button class="toolbarButton remark btn" title="Previous Page" id="previous" tabindex="13">
+        <span>注释</span>
+      </button>
+      <div class="splitToolbarButtonSeparator"></div>
+      <button class="toolbarButton sign btn" title="Next Page" id="next" tabindex="14">
+        <span>签名</span>
       </button>
     </div>
 
     <div class=" pageIndi">
-      <label id="pageNumberLabel" class="toolbarLabel" for="pageNumber" data-l10n-id="page_label"></label>
+      <label id="pageNumberLabel" class="toolbarLabel" for="pageNumber"></label>
       <input type="number" id="pageNumber" class="toolbarField pageNumber" value="1" size="4" min="1" tabindex="15">
       <span id="numPages" class="toolbarLabel"></span>
     </div>
@@ -134,8 +169,8 @@
 
     <div class="toolbarRight" id="toolbarRight">
         <div class="splitToolbarButton">
-          <button id="zoomOut" class="toolbarButton zoomOut btn" title="Zoom Out" tabindex="21" data-l10n-id="zoom_out">
-            <span data-l10n-id="zoom_out_label">缩小</span>
+          <button id="zoomOut" class="toolbarButton zoomOut btn" title="Zoom Out" tabindex="21">
+            <span>缩小</span>
           </button>
           <div class="splitToolbarButtonSeparator"></div>
           <button id="zoomPage" class="toolbarButton actual btn" title="页宽" tabindex="22">
@@ -143,25 +178,25 @@
             <span data-scale='page-width' class="hidden">实际</span>
           </button>
           <div class="splitToolbarButtonSeparator"></div>
-          <button id="zoomIn" class="toolbarButton zoomIn btn" title="Zoom In" tabindex="22" data-l10n-id="zoom_in">
-            <span data-l10n-id="zoom_in_label">放大</span>
+          <button id="zoomIn" class="toolbarButton zoomIn btn" title="Zoom In" tabindex="22">
+            <span>放大</span>
            </button>
         </div>
         <span id="scaleSelectContainer" class="dropdownToolbarButton">
-           <select id="scaleSelect" title="Zoom" tabindex="23" data-l10n-id="zoom">
-            <option id="pageAutoOption" title="" value="auto" selected="selected" data-l10n-id="page_scale_auto">Automatic Zoom</option>
-            <option id="pageActualOption" title="" value="page-actual" data-l10n-id="page_scale_actual">Actual Size</option>
-            <option id="pageFitOption" title="" value="page-fit" data-l10n-id="page_scale_fit">Fit Page</option>
-            <option id="pageWidthOption" title="" value="page-width" data-l10n-id="page_scale_width">Full Width</option>
+           <select id="scaleSelect" title="Zoom" tabindex="23">
+            <option id="pageAutoOption" title="" value="auto" selected="selected">Automatic Zoom</option>
+            <option id="pageActualOption" title="" value="page-actual">Actual Size</option>
+            <option id="pageFitOption" title="" value="page-fit">Fit Page</option>
+            <option id="pageWidthOption" title="" value="page-width">Full Width</option>
             <option id="customScaleOption" title="" value="custom"></option>
-            <option title="" value="0.5" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 50 }'>50%</option>
-            <option title="" value="0.75" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 75 }'>75%</option>
-            <option title="" value="1" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 100 }'>100%</option>
-            <option title="" value="1.25" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 125 }'>125%</option>
-            <option title="" value="1.5" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 150 }'>150%</option>
-            <option title="" value="2" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 200 }'>200%</option>
-            <option title="" value="3" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 300 }'>300%</option>
-            <option title="" value="4" data-l10n-id="page_scale_percent" data-l10n-args='{ "scale": 400 }'>400%</option>
+            <option title="" value="0.5" data-l10n-args='{ "scale": 50 }'>50%</option>
+            <option title="" value="0.75" data-l10n-args='{ "scale": 75 }'>75%</option>
+            <option title="" value="1" data-l10n-args='{ "scale": 100 }'>100%</option>
+            <option title="" value="1.25" data-l10n-args='{ "scale": 125 }'>125%</option>
+            <option title="" value="1.5" data-l10n-args='{ "scale": 150 }'>150%</option>
+            <option title="" value="2" data-l10n-args='{ "scale": 200 }'>200%</option>
+            <option title="" value="3" data-l10n-args='{ "scale": 300 }'>300%</option>
+            <option title="" value="4" data-l10n-args='{ "scale": 400 }'>400%</option>
           </select>
         </span>
       </div>
@@ -174,14 +209,14 @@
 <div id="passwordOverlay" class="container hidden">
   <div class="dialog">
     <div class="row">
-      <p id="passwordText" data-l10n-id="password_label">Enter the password to open this PDF file:</p>
+      <p id="passwordText">Enter the password to open this PDF file:</p>
     </div>
     <div class="row">
       <input type="password" id="password" class="toolbarField" />
     </div>
     <div class="buttonRow">
-      <button id="passwordCancel" class="overlayButton"><span data-l10n-id="password_cancel">Cancel</span></button>
-      <button id="passwordSubmit" class="overlayButton"><span data-l10n-id="password_ok">OK</span></button>
+      <button id="passwordCancel" class="overlayButton"><span>Cancel</span></button>
+      <button id="passwordSubmit" class="overlayButton"><span>OK</span></button>
     </div>
   </div>
 </div>
@@ -190,45 +225,45 @@
   <div id="documentPropertiesOverlay" class="container hidden">
     <div class="dialog">
       <div class="row">
-        <span data-l10n-id="document_properties_file_name">File name:</span> <p id="fileNameField">-</p>
+        <span>File name:</span> <p id="fileNameField">-</p>
       </div>
       <div class="row">
-        <span data-l10n-id="document_properties_file_size">File size:</span> <p id="fileSizeField">-</p>
-      </div>
-      <div class="separator"></div>
-      <div class="row">
-        <span data-l10n-id="document_properties_title">Title:</span> <p id="titleField">-</p>
-      </div>
-      <div class="row">
-        <span data-l10n-id="document_properties_author">Author:</span> <p id="authorField">-</p>
-      </div>
-      <div class="row">
-        <span data-l10n-id="document_properties_subject">Subject:</span> <p id="subjectField">-</p>
-      </div>
-      <div class="row">
-        <span data-l10n-id="document_properties_keywords">Keywords:</span> <p id="keywordsField">-</p>
-      </div>
-      <div class="row">
-        <span data-l10n-id="document_properties_creation_date">Creation Date:</span> <p id="creationDateField">-</p>
-      </div>
-      <div class="row">
-        <span data-l10n-id="document_properties_modification_date">Modification Date:</span> <p id="modificationDateField">-</p>
-      </div>
-      <div class="row">
-        <span data-l10n-id="document_properties_creator">Creator:</span> <p id="creatorField">-</p>
+        <span>File size:</span> <p id="fileSizeField">-</p>
       </div>
       <div class="separator"></div>
       <div class="row">
-        <span data-l10n-id="document_properties_producer">PDF Producer:</span> <p id="producerField">-</p>
+        <span>Title:</span> <p id="titleField">-</p>
       </div>
       <div class="row">
-        <span data-l10n-id="document_properties_version">PDF Version:</span> <p id="versionField">-</p>
+        <span>Author:</span> <p id="authorField">-</p>
       </div>
       <div class="row">
-        <span data-l10n-id="document_properties_page_count">Page Count:</span> <p id="pageCountField">-</p>
+        <span>Subject:</span> <p id="subjectField">-</p>
+      </div>
+      <div class="row">
+        <span>Keywords:</span> <p id="keywordsField">-</p>
+      </div>
+      <div class="row">
+        <span>Creation Date:</span> <p id="creationDateField">-</p>
+      </div>
+      <div class="row">
+        <span>Modification Date:</span> <p id="modificationDateField">-</p>
+      </div>
+      <div class="row">
+        <span>Creator:</span> <p id="creatorField">-</p>
+      </div>
+      <div class="separator"></div>
+      <div class="row">
+        <span>PDF Producer:</span> <p id="producerField">-</p>
+      </div>
+      <div class="row">
+        <span>PDF Version:</span> <p id="versionField">-</p>
+      </div>
+      <div class="row">
+        <span>Page Count:</span> <p id="pageCountField">-</p>
       </div>
       <div class="buttonRow">
-        <button id="documentPropertiesClose" class="overlayButton"><span data-l10n-id="document_properties_close">Close</span></button>
+        <button id="documentPropertiesClose" class="overlayButton"><span>Close</span></button>
       </div>
     </div>
   </div>
@@ -284,7 +319,7 @@
   //disableScroll( document.querySelector('#viewerContainer') );
 
 
-  var DEFAULT_URL = 'web/compressed.tracemonkey-pldi-09.pdf';
+  var DEFAULT_URL = 'font.pdf';
   var DEFAULT_SCALE_DELTA = 1.1;
   var MIN_SCALE = 0.25;
   var MAX_SCALE = 10.0;
@@ -1318,5 +1353,150 @@ window.addEventListener('afterprint', function afterPrint(evt) {
 
 
   </script>
+
+
+
+
+
+
+<script type="text/javascript" src="zepto.js"></script>
+<script type="text/javascript">
+  var canvas, ctx, flag = false,
+      prevX = 0,
+      currX = 0,
+      prevY = 0,
+      currY = 0,
+      dot_flag = false;
+
+  var x = "red",
+      y = 4;
+  var page;
+
+  function init() {
+      canvas = document.getElementById('canDrawer');
+
+      var pv = PDFView.pdfViewer;
+      var curpage = pv.currentPageNumber;
+      var pageView = pv.getPageView( curpage-1 );
+      page = $('#page'+curpage);
+      var off = page.offset();
+      canvas.width = $(window).width();
+      canvas.height = $(window).height();
+      $('#drawer').css({marginLeft: Math.max(0,off.left) });
+
+
+      ctx = canvas.getContext("2d");
+      w = canvas.width;
+      h = canvas.height;
+
+      canvas.addEventListener("mousemove", function (e) {
+          findxy('move', e)
+      }, false);
+      canvas.addEventListener("mousedown", function (e) {
+          findxy('down', e)
+      }, false);
+      canvas.addEventListener("mouseup", function (e) {
+          findxy('up', e)
+      }, false);
+      canvas.addEventListener("mouseout", function (e) {
+          findxy('out', e)
+      }, false);
+  }
+
+  function color(obj) {
+      switch (obj.id) {
+          case "green":
+              x = "green";
+              break;
+          case "blue":
+              x = "blue";
+              break;
+          case "red":
+              x = "red";
+              break;
+          case "yellow":
+              x = "yellow";
+              break;
+          case "orange":
+              x = "orange";
+              break;
+          case "black":
+              x = "black";
+              break;
+          case "white":
+              x = "white";
+              break;
+      }
+      if (x == "white") y = 14;
+      else y = 2;
+
+  }
+
+  function draw() {
+      ctx.beginPath();
+      ctx.moveTo(prevX, prevY);
+      ctx.lineTo(currX, currY);
+      ctx.strokeStyle = x;
+      ctx.lineWidth = y;
+      ctx.stroke();
+      ctx.closePath();
+  }
+
+  function erase() {
+      var m = confirm("Want to clear");
+      if (m) {
+          ctx.clearRect(0, 0, w, h);
+      }
+  }
+
+  function save() {
+      var dataURL = canvas.toDataURL();
+      //window.open(dataURL);
+      $.ajax({
+          url:'http://1111hui.com:3000/pdf',
+          type:'POST',
+          data:{type:"img", src:dataURL, pageWidth:page.width(), pageHeight:page.height()  }
+      });
+  }
+
+  function findxy(res, e) {
+      if (res == 'down') {
+          prevX = currX;
+          prevY = currY;
+          currX = e.clientX - $(canvas).offset().left;
+          currY = e.clientY - $(canvas).offset().top;
+
+          flag = true;
+          dot_flag = true;
+          if (dot_flag) {
+              ctx.beginPath();
+              ctx.fillStyle = x;
+              ctx.fillRect(currX, currY, 2, 2);
+              ctx.closePath();
+              dot_flag = false;
+          }
+      }
+      if (res == 'up' || res == "out") {
+          flag = false;
+      }
+      if (res == 'move') {
+          if (flag) {
+              prevX = currX;
+              prevY = currY;
+              currX = e.clientX - $(canvas).offset().left;
+              currY = e.clientY - $(canvas).offset().top;
+              draw();
+          }
+      }
+  }
+
+$('.remark').on('click',function  (e) {
+  $('#drawer').show();
+  init();
+});
+
+</script>
+
+
 </body>
 </html>
