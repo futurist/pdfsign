@@ -13,10 +13,13 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var multer = require("multer");
 var app = express();
- 
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
+app.use(bodyParser.urlencoded({limit: '2mb', extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(bodyParser.json({limit: '2mb'}));
+
 app.use(multer()); // for parsing multipart/form-data
+
+
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -102,14 +105,13 @@ function _logErr () {
 }
 
 function genPDF ( infile, imagefile, outfile ) {
+	//pdftoppm -rx 150 -ry 150 -png file.pdf prefix
   exec('./mergepdf.py -i '+ infile +'.pdf -m '+imagefile+'.pdf -o '+ outfile +'.pdf ', function (error, stdout, stderr) {
     console.log(stdout);
   });
 
 }
 
-var a='_MONGODATA {"type" : "genPDF" , "image":"image"}';
-console.log( a.split(_DBSIGN) );
 
 function runCmd (cmd, dir, callback) {
 
@@ -122,11 +124,11 @@ function runCmd (cmd, dir, callback) {
     cwd: (dir?dir:__dirname),
     stdio: "pipe",
   });
-  
+
   proc.stdout.setEncoding('utf8');
   proc.stdout.on('data', function (data) {
 
-      //console.log(data);
+      console.log(data);
       if( data && ( new RegExp ("^"+_DBSIGN) ).test(data) ) {
         var d = JSON.parse(data.split(_DBSIGN)[1]);
         if(d.type=="genPDF"){
@@ -138,7 +140,7 @@ function runCmd (cmd, dir, callback) {
   });
 
   proc.stderr.on('data', function (data) {
-    //_logErr(data);
+    _logErr(data);
   });
 
   proc.on('close', function (code) {

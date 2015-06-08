@@ -38,9 +38,6 @@
       bottom: 0;
       left: 0;
     }
-    #mainCon .canOverlay canvas{
-      cursor: cell;
-    }
     #viewerContainer {
       overflow: auto;
       -webkit-overflow-scrolling: touch;
@@ -134,7 +131,7 @@
   <div id="mainCon">
   <div id="drawer" class="canOverlay">
     <canvas id="canDrawer"></canvas>
-    <div id="aa" style="position:absolute; width:2px; height:2px; background:red;"></div>
+    <canvas id="canDrawerTemp" class="hidden"></canvas>
   </div>
   <div id="viewerContainer">
     <div id="viewer" class="pdfViewer"></div>
@@ -1364,7 +1361,7 @@ window.addEventListener('afterprint', function afterPrint(evt) {
 
 <script type="text/javascript" src="zepto.js"></script>
 <script type="text/javascript">
-  var canvas, ctx, flag = false,
+  var canvas, canvas2, ctx, flag = false,
       prevX = 0,
       currX = 0,
       prevY = 0,
@@ -1374,19 +1371,30 @@ window.addEventListener('afterprint', function afterPrint(evt) {
   var x = "red",
       y = 4;
   var page;
-var pageView;
+  var pageView;
+  var pdfWidth;
+  var pdfHeight;
 
   function init() {
       canvas = document.getElementById('canDrawer');
+      canvas2 = document.getElementById('canDrawerTemp');
 
       var pv = PDFView.pdfViewer;
       var curpage = pv.currentPageNumber;
       pageView = pv.getPageView( curpage-1 );
       page = $('#page'+curpage);
+
+      pdfWidth = pageView.viewport.viewBox[2];
+      pdfHeight = pageView.viewport.viewBox[3];
+
       var off = page.offset();
-      canvas.width = parseFloat(page.get(0).style.width);
-      canvas.height = parseFloat(page.get(0).style.height);
-      $('#drawer').css({marginLeft: Math.max(0,off.left) });
+      $('#drawer').offset(off).width(off.width).height(off.height);
+      canvas.width = $(page).width();
+      canvas.height = $(page).height();
+      //$('#drawer').css({marginLeft: Math.max(0,off.left) });
+
+      canvas2.width = $(window).width();
+      canvas2.height = $(window).height();
 
 
       ctx = canvas.getContext("2d");
@@ -1454,12 +1462,36 @@ var pageView;
   }
 
   function save() {
+
+      // var off=page.offset();
+
+      // var offLeft = Math.min(0, off.left());
+      // var offTop = Math.min(0, off.top());
+
+      var bgContext = canvas2.getContext("2d");
+      bgContext.clearRect(0,0,canvas2.width,canvas2.height);
+      bgContext.drawImage(canvas, // source
+                            offLeft,offTop,   // source coordinates
+                            canvas.width, canvas.height,   // source dimension
+                            0, 0,       // target coordinates
+                            canvas2.width, canvas2.height);  // target dimensions
+
       var dataURL = canvas.toDataURL();
-      //window.open(dataURL);
+
       $.ajax({
           url:'http://1111hui.com:3000/pdf',
           type:'POST',
-          data:{type:"img", src:dataURL, pageWidth:pageView.viewport.viewBox[2], pageHeight:pageView.viewport.viewBox[3]  }
+          //contentType:'application/json',
+          data:{type:"img", src:dataURL, pageWidth:page.width(), pageHeight:page.height(),pdfWidth:pdfWidth, pdfHeight:pdfHeight },
+          success:function  (data, status, xhr) {
+            console.log(status);
+          },
+          error:function  (xhr, errorType, error) {
+            console.log(error);
+          },
+          complete:function  (xhr,status) {
+
+          }
       });
   }
 

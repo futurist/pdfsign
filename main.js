@@ -33,7 +33,7 @@ if( sys.args.indexOf('nows')>-1 ){
 	            delete wsQueue[d.msgid];
 	        }
 	        if(d.type=="img"){
-	        	openCanvas(d.src);
+	        	openCanvas(d);
 	        }
 
 		}
@@ -88,13 +88,14 @@ function DB_MSG (json) {
 
 function openCanvas(data, config) {
 
-
+	var pdfWidth = data.pdfWidth;
+	var pdfHeight = data.pdfHeight;
 	var page = require('webpage').create();
 	page.settings.userAgent = 'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36';
 	page.settings.resourceTimeout = RES_TIMEOUT;
 
-	page.viewportSize = { width:1000, height:800 };
-
+	page.viewportSize = { width: pdfWidth || 1000, height: pdfHeight ||800 };
+	//page.viewportSize = { width: 1000, height: 800 };
 
 	function EXIT( exist ){
 		setTimeout(function(){
@@ -114,13 +115,13 @@ function openCanvas(data, config) {
 	}
 
 	function renderPage (filepath) {
-		
 
-		page.paperSize = {
-		  width: '8.5in',
-		  height: '11in',
-		  margin:{ top:"5cm", bottom:"1cm"},
-		}
+
+		// page.paperSize = {
+		//   width: '8.5in',
+		//   height: '11in',
+		//   margin:{ top:"5cm", bottom:"1cm"},
+		// }
 
 		DATA_FOLDER = ".";
 		filepath = "image";
@@ -198,32 +199,35 @@ function openCanvas(data, config) {
 		}
 
 
-		var c = page.evaluate( function( data, _MSGSIGN, _DBSIGN) {
+		var c = page.evaluate( function( data, pdfWidth, _MSGSIGN, _DBSIGN) {
 
 			function sendMSG (json) {
 				console.log(_MSGSIGN, JSON.stringify(json) );
 			}
 
 			var c1 = document.querySelector('#c1');
-			
+
 			var img = new Image();
-			
+
 			img.onload=function  () {
 				var w = img.width;
 				var h = img.height;
+				var scale = pdfWidth/w;
+				w=Math.round(w*scale);
+				h=Math.round(h*scale);
 				c1.width = w;
 				c1.height = h;
 				c1.style.width = w+"px";
 				c1.style.height = h+"px";
 				var ctx = c1.getContext('2d');
-				ctx.drawImage(img, 0, 0);
-				sendMSG({cmd:"save"});				
+				ctx.drawImage(img, 0, 0, img.width, img.height, 0,0,w,h);
+				sendMSG({cmd:"save"});
 			}
 
 			img.src = data;
-			
 
-		}, data, _MSGSIGN, _DBSIGN);
+
+		}, data.src, pdfWidth, _MSGSIGN, _DBSIGN);
 
 	}
 
@@ -236,5 +240,5 @@ function openCanvas(data, config) {
 function init () {
 	console.log("phantomjs start.");
 
-	
+
 }
