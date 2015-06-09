@@ -18,8 +18,9 @@
       width: 100%;
       position: fixed;
     }
-    #mainCon {
+    #mainCon, #drawerCon {
       position: absolute;
+      overflow: hidden;
       top: 32px;
       right: 0;
       bottom: 0;
@@ -28,7 +29,7 @@
       height:calc(100%-32px);
       outline: none;
     }
-    #mainCon .canOverlay{
+    #drawer{
       position: absolute;
       display: none;
       background: rgba(0,0,0,0.2);
@@ -126,13 +127,15 @@
 
 <body tabindex="1">
 
+  <div id="drawerCon">
+    <div id="drawer" class="canOverlay">
+      <canvas id="canDrawer"></canvas>
+      <canvas id="canDrawerTemp" class="hidden"></canvas>
+    </div>
+  </div>
 
 
   <div id="mainCon">
-  <div id="drawer" class="canOverlay">
-    <canvas id="canDrawer"></canvas>
-    <canvas id="canDrawerTemp" class="hidden"></canvas>
-  </div>
   <div id="viewerContainer">
     <div id="viewer" class="pdfViewer"></div>
   </div>
@@ -319,7 +322,7 @@
   //disableScroll( document.querySelector('#viewerContainer') );
 
 
-  var DEFAULT_URL = 'font.pdf';
+  var DEFAULT_URL = 'web/compressed.tracemonkey-pldi-09.pdf';
   var DEFAULT_SCALE_DELTA = 1.1;
   var MIN_SCALE = 0.25;
   var MAX_SCALE = 10.0;
@@ -1374,6 +1377,8 @@ window.addEventListener('afterprint', function afterPrint(evt) {
   var pageView;
   var pdfWidth;
   var pdfHeight;
+  var offLeft;
+  var offTop;
 
   function init() {
       canvas = document.getElementById('canDrawer');
@@ -1388,13 +1393,20 @@ window.addEventListener('afterprint', function afterPrint(evt) {
       pdfHeight = pageView.viewport.viewBox[3];
 
       var off = page.offset();
-      $('#drawer').offset(off).width(off.width).height(off.height);
+      var conOff=$('#drawerCon').offset();
+      off.top -= conOff.top;
+
+      $('#drawer').css({left:off.left, top:off.top }).width(off.width).height(off.height);
+
+      offLeft = -Math.min(0, off.left ) ;
+      offTop = -Math.min(0, off.top );
+
       canvas.width = $(page).width();
       canvas.height = $(page).height();
       //$('#drawer').css({marginLeft: Math.max(0,off.left) });
 
-      canvas2.width = $(window).width();
-      canvas2.height = $(window).height();
+      canvas2.width = conOff.width;
+      canvas2.height = conOff.height;
 
 
       ctx = canvas.getContext("2d");
@@ -1462,12 +1474,6 @@ window.addEventListener('afterprint', function afterPrint(evt) {
   }
 
   function save() {
-
-      var off=page.offset();
-      var mainOff = $('#mainCon').offset();
-
-      var offLeft = -Math.min(0, off.left )+mainOff.left;
-      var offTop = -Math.min(0, off.top )+mainOff.top;
 
       var bgContext = canvas2.getContext("2d");
       bgContext.clearRect(0,0,canvas2.width,canvas2.height);

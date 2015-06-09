@@ -90,6 +90,8 @@ function openCanvas(data, config) {
 
 	var pdfWidth = data.pdfWidth;
 	var pdfHeight = data.pdfHeight;
+	var offLeft = data.offLeft;
+	var offTop = data.offTop;
 	var page = require('webpage').create();
 	page.settings.userAgent = 'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36';
 	page.settings.resourceTimeout = RES_TIMEOUT;
@@ -182,7 +184,20 @@ function openCanvas(data, config) {
 
 		}
 	};
+	page.onError = function(msg, trace) {
 
+	  var msgStack = ['ERROR: ' + msg];
+
+	  if (trace && trace.length) {
+	    msgStack.push('TRACE:');
+	    trace.forEach(function(t) {
+	      msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+	    });
+	  }
+
+	  console.error(msgStack.join('\n'));
+
+	};
 
 	function pageFailed (reason) {
 		console.log(url, "#############FAILED!!###############");
@@ -198,8 +213,7 @@ function openCanvas(data, config) {
 			return;
 		}
 
-
-		var c = page.evaluate( function( data, pdfWidth, _MSGSIGN, _DBSIGN) {
+		var c = page.evaluate( function( data, _MSGSIGN, _DBSIGN) {
 
 			function sendMSG (json) {
 				console.log(_MSGSIGN, JSON.stringify(json) );
@@ -212,22 +226,32 @@ function openCanvas(data, config) {
 			img.onload=function  () {
 				var w = img.width;
 				var h = img.height;
-				var scale = pdfWidth/w;
-				w=Math.round(w*scale);
-				h=Math.round(h*scale);
-				c1.width = w;
-				c1.height = h;
-				c1.style.width = w+"px";
-				c1.style.height = h+"px";
+
+				var cw = data.pageWidth;
+				var ch = data.pageHeight;
+				var scale = data.pdfWidth/cw;
+
+				cw=cw*scale;
+				ch=ch*scale;
+
+				var left= data.offLeft*scale;
+				var top= data.offTop*scale;
+				c1.width = cw;
+				c1.height = ch;
+				c1.style.width = cw+"px";
+				c1.style.height = ch+"px";
+				c1.style.marginLeft = left+'px';
+				c1.style.marginTop = top+'px';
+				console.log(scale, img.width, img.height,left,top,w,h);
 				var ctx = c1.getContext('2d');
-				ctx.drawImage(img, 0, 0, img.width, img.height, 0,0,w,h);
+				ctx.drawImage(img, 0, 0, w,h ,0,0 ,w*scale,h*scale);
 				sendMSG({cmd:"save"});
 			}
 
-			img.src = data;
+			img.src = data.src;
 
 
-		}, data.src, pdfWidth, _MSGSIGN, _DBSIGN);
+		}, data, _MSGSIGN, _DBSIGN);
 
 	}
 
