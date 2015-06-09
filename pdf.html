@@ -1463,26 +1463,28 @@ window.addEventListener('afterprint', function afterPrint(evt) {
 
   function save() {
 
-      // var off=page.offset();
+      var off=page.offset();
+      var mainOff = $('#mainCon').offset();
 
-      // var offLeft = Math.min(0, off.left());
-      // var offTop = Math.min(0, off.top());
+      var offLeft = -Math.min(0, off.left )+mainOff.left;
+      var offTop = -Math.min(0, off.top )+mainOff.top;
 
       var bgContext = canvas2.getContext("2d");
       bgContext.clearRect(0,0,canvas2.width,canvas2.height);
       bgContext.drawImage(canvas, // source
                             offLeft,offTop,   // source coordinates
-                            canvas.width, canvas.height,   // source dimension
+                            canvas2.width, canvas2.height,   // source dimension
                             0, 0,       // target coordinates
                             canvas2.width, canvas2.height);  // target dimensions
 
-      var dataURL = canvas.toDataURL();
+      var dataURL = canvas2.toDataURL();
+      window.open(dataURL);
 
       $.ajax({
           url:'http://1111hui.com:3000/pdf',
           type:'POST',
           //contentType:'application/json',
-          data:{type:"img", src:dataURL, pageWidth:page.width(), pageHeight:page.height(),pdfWidth:pdfWidth, pdfHeight:pdfHeight },
+          data:{type:"img", src:dataURL, pageWidth:page.width(), pageHeight:page.height(),pdfWidth:pdfWidth, pdfHeight:pdfHeight, offLeft:offLeft, offTop:offTop },
           success:function  (data, status, xhr) {
             console.log(status);
           },
