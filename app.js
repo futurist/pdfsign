@@ -7,7 +7,7 @@ var ObjectID = require('mongodb').ObjectID;
 var _ = require('underscore');
 var assert = require('assert');
 
-
+var fs = require('fs');
 
 var express = require("express");
 var bodyParser = require("body-parser");
@@ -30,8 +30,22 @@ var allowCrossDomain = function(req, res, next) {
 app.use(allowCrossDomain);
 
 app.post("/pdf", function (req, res) {
-  res.send("You sent " + JSON.stringify(req.body) );
-  broadcast(req.body);
+  res.send("You sent ok" );
+  //broadcast(req.body);
+  var data = req.body;
+  var src = data.src.replace(/^data:image\/png+;base64,/, "").replace(/ /g, '+');
+
+  fs.writeFile('aaa.png', src, 'base64', function(err) {
+      assert.equal(null, err);
+      var scale = data.pdfWidth/data.pageWidth;
+      var X=data.offLeft*scale;
+      var Y=data.offTop*scale;
+      var W=data.imgWidth*scale;
+      exec('pdflatex "\\def\\WIDTH{'+data.pdfWidth+'px} \\def\\HEIGHT{'+data.pdfHeight+'px} \\def\\X{'+X+'px} \\def\\Y{'+Y+'px} \\def\\W{'+W+'px} \\def\\IMG{'+'aaa.png'+'} \\input{imagela.tex}"', function(err,stdout,stderr){
+        console.log(stderr);
+        genPDF("font", 'imagela', 1, "out");
+      });
+  });
 });
 
 app.listen(3000);
@@ -49,7 +63,7 @@ MongoClient.connect(authUrl, function(err, _db) {
   	console.log("Connected correctly to server");
 	db = _db.db("test");
 	// db.collection('test').find().toArray(function(err, items){ console.log(items); });
-	runCmd("phantomjs main.js");
+	//runCmd("phantomjs main.js");
   });
 });
 
@@ -108,6 +122,13 @@ function _logErr () {
 }
 
 function genPDF ( infile, imagefile, scale, outfile ) {
+
+  exec('./mergepdf.py -i '+ infile +'.pdf -m '+imagefile+'.pdf -o '+ outfile +'.pdf ', function (error, stdout, stderr) {
+    console.log(error,stdout, stderr);
+  });
+
+  return;
+
   // pdftoppm -rx 150 -ry 150 -png file.pdf prefix
   // convert image.pdf -verbose -density 177.636  -quality 100 -sharpen 0x1.0 -background "rgba(0,0,0,0)" -transparent white image1x04.pdf
   exec('convert '+imagefile+'.pdf -density '+ scale +' -quality 100 -sharpen 0x1.0 -background "rgba(0,0,0,0)" -transparent white '+ imagefile +'1x.pdf', function (error, stdout, stderr) {

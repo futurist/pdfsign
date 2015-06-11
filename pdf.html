@@ -1490,7 +1490,7 @@ window.addEventListener('afterprint', function afterPrint(evt) {
           url:'http://1111hui.com:3000/pdf',
           type:'POST',
           //contentType:'application/json',
-          data:{type:"img", src:dataURL, pageWidth:page.width(), pageHeight:page.height(),pdfWidth:pdfWidth, pdfHeight:pdfHeight, offLeft:offLeft, offTop:offTop },
+          data:{type:"img", src:dataURL, imgWidth:canvas2.width, imgHeight:canvas2.height, pageWidth:page.width(), pageHeight:page.height(),pdfWidth:pdfWidth, pdfHeight:pdfHeight, offLeft:offLeft, offTop:offTop },
           success:function  (data, status, xhr) {
             console.log(status);
           },

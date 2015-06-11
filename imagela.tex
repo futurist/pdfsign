@@ -1,5 +1,5 @@
 % Command line :
-%    pdflatex "\def\WIDTH{100px} \def\HEIGHT{100px} \def\X{0px} \def\Y{0px} \def\W{50px} \input{imagela.tex}"
+%    pdflatex "\def\WIDTH{100px} \def\HEIGHT{100px} \def\X{0px} \def\Y{0px} \def\W{50px} \def\IMG{aaa.png} \input{imagela.tex}"
 
 \documentclass[oneside,final,12pt]{memoir}
 
@@ -27,7 +27,7 @@
 
 
 	\begin{textblock*}{\textwidth}(\X,\Y)
-		\includegraphics[keepaspectratio=true,width=\W]{aa.png}%
+		\includegraphics[keepaspectratio=true,width=\W]{\IMG}%
 	\end{textblock*}
 
 	%\includepdf[keepaspectratio=true, pages=-, width=\textwidth, delta=0 0, offset=0 0px]{mongodb.pdf}
