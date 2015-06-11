@@ -88,6 +88,8 @@ function DB_MSG (json) {
 
 function openCanvas(data, config) {
 
+	var pageWidth = data.pageWidth;
+	var pageHeight = data.pageHeight;
 	var pdfWidth = data.pdfWidth;
 	var pdfHeight = data.pdfHeight;
 	var offLeft = data.offLeft;
@@ -96,7 +98,7 @@ function openCanvas(data, config) {
 	page.settings.userAgent = 'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36';
 	page.settings.resourceTimeout = RES_TIMEOUT;
 
-	page.viewportSize = { width: pdfWidth || 1000, height: pdfHeight ||800 };
+	page.viewportSize = { width: pageWidth || 1000, height: pageHeight ||800 };
 	//page.viewportSize = { width: 1000, height: 800 };
 
 	function EXIT( exist ){
@@ -129,7 +131,7 @@ function openCanvas(data, config) {
 		filepath = "image";
 		page.render( DATA_FOLDER + "/" + filepath+".pdf", {format:'pdf', quality:'100' });
 		console.log("render page:",  filepath+".pdf");
-		DB_MSG({type:"genPDF", image:filepath });
+		DB_MSG({type:"genPDF", image:filepath, scale: pageWidth/pdfWidth*72 });
 
 	}
 
@@ -229,7 +231,7 @@ function openCanvas(data, config) {
 
 				var cw = data.pageWidth;
 				var ch = data.pageHeight;
-				var scale = data.pdfWidth/cw;
+				var scale = data.pageWidth/cw;
 
 				cw=cw*scale;
 				ch=ch*scale;

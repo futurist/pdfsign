@@ -1,0 +1,88 @@
+\documentclass[oneside,final,12pt]{memoir}
+\usepackage[
+  paperwidth=612px,
+  paperheight=792px,
+  margin=0px,
+]{geometry}
+\thispagestyle{empty} %% Remove header and footer.
+\setlength{\marginparsep}{0px}
+\setlength{\marginparwidth}{0px}
+\setlength{\marginparpush}{0px}
+\setlength{\parindent}{0px}
+\setlength{\parskip}{0px}
+
+%\addtolength{\hoffset}{-10pt}
+%\usepackage{showframe}
+%\usepackage{layout}
+
+\usepackage[absolute,overlay]{textpos}
+\setlength{\TPHorizModule}{\textwidth}
+\setlength{\TPVertModule}{\textheight}
+\textblockorigin{0px}{0px}
+
+\usepackage{pdfpages}
+%\setlength{\pdfpxdimen}{1in/600} % Define resolution of PDF
+\begin{document}
+
+%\layout{}
+
+
+\includegraphics[keepaspectratio=true,width=612px]{1.jpg}
+
+\begin{textblock*}{\textwidth}(10px,10px)
+	\includegraphics[keepaspectratio=true,width=115px]{1.jpg}%
+\end{textblock*}
+
+\begin{textblock*}{\textwidth}(0px,0px)
+	\includegraphics[keepaspectratio=true,width=115px]{1.jpg}%
+\end{textblock*}
+
+%\includepdf[keepaspectratio=true, width=300px, delta=0 0, offset=0 100px]{1.jpg}
+
+
+\begin{frame}{Some title}
+  Some text
+\end{frame}
+
+\begin{frame}[center]{Part A}
+  \begin{textblock*}{300pt}(0.1\textwidth, 0.5\textheight)
+    \Large
+    \centering
+    This title should not appear at the first slide!
+  \end{textblock*}
+\end{frame}
+
+\makebox[0pt]{Some text} over this text
+
+\makebox[15ex][s]{Censored text}\hspace{-15ex}\makebox[15ex][s]{X X X X X}
+
+Text \makebox[2\width][r]{running away}
+
+This prints a thick and more distant frame:
+
+\setlength{\fboxsep}{10pt}
+\setlength{\fboxrule}{5pt}
+\fbox{A frame.}
+
+This shows the box frame of a letter.
+%
+\setlength{\fboxsep}{0pt}
+\fbox{A}
+
+\noindent
+\fbox{\parbox[b][4em][t]{0.33\textwidth}{Some \\ text} }
+\fbox{\parbox[c][4em][s]{0.33\textwidth}{Some \vfill text} }
+\fbox{\parbox[t][4em][c]{0.33\textwidth}{Some \\ text} }
+
+
+\resizebox{10ex}{2\baselineskip}{Dunhill style}
+\scalebox{10}{Giant}
+
+\makebox[\textwidth]{c e n t r a l} \par
+\makebox[\textwidth][s]{s p r e a d} \par
+\framebox[1.1\width]{Guess I’m framed now!} \par
+\framebox[0.8\width][r]{Bummer, I am too wide} \par
+\framebox[1cm][l]{never mind, so am I}
+Can you read this?
+
+\end{document}

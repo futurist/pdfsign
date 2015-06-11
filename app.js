@@ -40,14 +40,17 @@ console.log("Listening");
 
 /******** DB part ***********/
 // Connection URL
-var url = 'mongodb://1111hui.com:27017/test';
+var authUrl = 'mongodb://1111hui.com:27017/admin';
 var db = null;
-MongoClient.connect(url, function(err, _db) {
+MongoClient.connect(authUrl, function(err, _db) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
-  db = _db;
-  runCmd("phantomjs main.js");
-  return true;
+  _db.authenticate('root', '820125', function(err, res){
+  	assert.equal(null, err);
+  	console.log("Connected correctly to server");
+	db = _db.db("test");
+	// db.collection('test').find().toArray(function(err, items){ console.log(items); });
+	runCmd("phantomjs main.js");
+  });
 });
 
 
@@ -104,10 +107,14 @@ function _logErr () {
     if(arguments[i]) process.stderr.write(arguments[i]);
 }
 
-function genPDF ( infile, imagefile, outfile ) {
-	//pdftoppm -rx 150 -ry 150 -png file.pdf prefix
-  exec('./mergepdf.py -i '+ infile +'.pdf -m '+imagefile+'.pdf -o '+ outfile +'.pdf ', function (error, stdout, stderr) {
-    console.log(stdout);
+function genPDF ( infile, imagefile, scale, outfile ) {
+  // pdftoppm -rx 150 -ry 150 -png file.pdf prefix
+  // convert image.pdf -verbose -density 177.636  -quality 100 -sharpen 0x1.0 -background "rgba(0,0,0,0)" -transparent white image1x04.pdf
+  exec('convert '+imagefile+'.pdf -density '+ scale +' -quality 100 -sharpen 0x1.0 -background "rgba(0,0,0,0)" -transparent white '+ imagefile +'1x.pdf', function (error, stdout, stderr) {
+      console.log(stdout);
+      exec('./mergepdf.py -i '+ infile +'.pdf -m '+imagefile+'1x.pdf -o '+ outfile +'.pdf ', function (error, stdout, stderr) {
+        console.log(stdout);
+      });
   });
 
 }
@@ -132,7 +139,7 @@ function runCmd (cmd, dir, callback) {
       if( data && ( new RegExp ("^"+_DBSIGN) ).test(data) ) {
         var d = JSON.parse(data.split(_DBSIGN)[1]);
         if(d.type=="genPDF"){
-          genPDF("font", d.image, "out");
+          genPDF("font", d.image, d.scale, "out");
         }
       }else{
         //_log(data);
