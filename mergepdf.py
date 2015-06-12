@@ -5,7 +5,12 @@ import PyPDF2 as pypdf
 import sys
 import getopt
 
+# TOOLS: http://williamjturkel.net/2013/08/24/working-with-pdfs-using-command-line-tools-in-linux/
+# yum install -y xpdf pdftk poppler-utils
+# pdftotext a.pdf a.txt
+
 def mergePDF(inpath, imgpath, outpath):
+    content = []
     inFile = open(inpath, "rb")
     # overlay = open(imgpath, "rb")
     with open(imgpath, "rb") as overlay:
@@ -15,16 +20,22 @@ def mergePDF(inpath, imgpath, outpath):
 
         # merge the first two pages
         background.mergePage(foreground)
+        content.append(background.extractText().encode('utf-8').replace("\xa0", " "))
 
         # add all pages to a writer
         writer = pypdf.PdfFileWriter()
         for i in range(original.getNumPages()):
             page = original.getPage(i)
             writer.addPage(page)
+            content.append(page.extractText().encode('utf-8').replace("\xa0", " "))
 
         # write everything in the writer to a file
         with open(outpath, "wb") as outFile:
+            writer.addMetadata({'/Producer': 'yumji'})
             writer.write(outFile)
+        #print '\n'.join(content)
+        # don't rely on pyPDF to get text, using xpdf command pdftotext instead.
+        print "ok"
 
 def main(argv):
     inputfile = ''

@@ -1,36 +1,87 @@
-% Command line :
-%    pdflatex "\def\WIDTH{100px} \def\HEIGHT{100px} \def\X{0px} \def\Y{0px} \def\W{50px} \def\IMG{aaa.png} \input{imagela.tex}"
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
 
-\documentclass[oneside,final,12pt]{memoir}
+% Install Tex Live Suite first: http://anorien.csc.warwick.ac.uk/mirrors/CTAN/systems/texlive/Images/texlive2015.iso
+% Or follow the link: http://www.cnblogs.com/Z-X-L/articles/2636107.html
+% fc-list :lang=zh-cn to view Installed Chinese fonts
+%
+% Command line :
+%    xelatex "\def\WIDTH{600pt} \def\HEIGHT{600pt} \def\X{0pt} \def\Y{0pt} \def\W{550pt} \def\IMG{aaa.png} \input{imagela.tex}"
+
+\documentclass[oneside,final,12pt]{article}
+
+\usepackage{xeCJK}
+\setmainfont{Arial}
+\setromanfont{Times New Roman}
+\setCJKmainfont{Microsoft YaHei}
 
 \usepackage{calc}
 
 \usepackage[
   paperwidth=\WIDTH,
   paperheight=\HEIGHT,
-  margin=0px,
+  margin=0pt,
 ]{geometry}
 \thispagestyle{empty} %% Remove header and footer.
-\setlength{\marginparsep}{0px}
-\setlength{\marginparwidth}{0px}
-\setlength{\marginparpush}{0px}
-\setlength{\parindent}{0px}
-\setlength{\parskip}{0px}
+\setlength{\marginparsep}{0pt}
+\setlength{\marginparwidth}{0pt}
+\setlength{\marginparpush}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
 
 
 \usepackage[absolute,overlay]{textpos}
-\textblockorigin{0px}{0px}
+\textblockorigin{0pt}{0pt}
 
 \usepackage{pdfpages}
-%\setlength{\pdfpxdimen}{1in/600} % Define resolution of PDF
+%\setlength{\pdfptdimen}{1in/600} % Define resolution of PDF
 \begin{document}
 
+
+%-----------------------xeCJK下设置中文字体------------------------------%  
+\setCJKfamilyfont{song}{SimSun}                             %宋体 song  
+\newcommand{\song}{\CJKfamily{song}}                        % 宋体   (Windows自带simsun.ttf)  
+\setCJKfamilyfont{xs}{NSimSun}                              %新宋体 xs  
+\newcommand{\xs}{\CJKfamily{xs}}  
+\setCJKfamilyfont{fs}{Fangsong ti}                      %仿宋2312 fs  
+\newcommand{\fs}{\CJKfamily{fs}}                            %仿宋体 (Windows自带simfs.ttf)  
+\setCJKfamilyfont{kai}{KaiTi_GB2312}                        %楷体2312  kai  
+\newcommand{\kai}{\CJKfamily{kai}}                            
+\setCJKfamilyfont{yh}{Microsoft YaHei}                    %微软雅黑 yh  
+\newcommand{\yh}{\CJKfamily{yh}}  
+\setCJKfamilyfont{hei}{Adobe Heiti Std}                                    %黑体  hei  
+\newcommand{\hei}{\CJKfamily{hei}}                          % 黑体   (Windows自带simhei.ttf)  
+\setCJKfamilyfont{adobehei}{Adobe Heiti Std}                                    %黑体  hei  
+\newcommand{\adobehei}{\CJKfamily{adobehei}}                          % 黑体   (Windows自带simhei.ttf)  
+
+%------------------------------设置字体大小------------------------%  
+\newcommand{\chuhao}{\fontsize{42pt}{\baselineskip}\selectfont}     %初号  
+\newcommand{\xiaochuhao}{\fontsize{36pt}{\baselineskip}\selectfont} %小初号  
+\newcommand{\yihao}{\fontsize{28pt}{\baselineskip}\selectfont}      %一号  
+\newcommand{\erhao}{\fontsize{21pt}{\baselineskip}\selectfont}      %二号  
+\newcommand{\xiaoerhao}{\fontsize{18pt}{\baselineskip}\selectfont}  %小二号  
+\newcommand{\sanhao}{\fontsize{15.75pt}{\baselineskip}\selectfont}  %三号  
+\newcommand{\sihao}{\fontsize{14pt}{\baselineskip}\selectfont}%     四号  
+\newcommand{\xiaosihao}{\fontsize{12pt}{\baselineskip}\selectfont}  %小四号  
+\newcommand{\wuhao}{\fontsize{10.5pt}{\baselineskip}\selectfont}    %五号  
+\newcommand{\xiaowuhao}{\fontsize{9pt}{\baselineskip}\selectfont}   %小五号  
+\newcommand{\liuhao}{\fontsize{7.875pt}{\baselineskip}\selectfont}  %六号  
+\newcommand{\qihao}{\fontsize{5.25pt}{\baselineskip}\selectfont}    %七号  
+
+oijsweogjoejgojowejg
+23459872398572937
+\song\chuhao 新技术革 \yh\wuhao \hei\yihao 命新技术革命世宽松
+\sihao
+新技术革命新的校
+\qihao
+oijsweogjoejgojowejg
+23459872398572937
 
 	\begin{textblock*}{\textwidth}(\X,\Y)
 		\includegraphics[keepaspectratio=true,width=\W]{\IMG}%
 	\end{textblock*}
 
-	%\includepdf[keepaspectratio=true, pages=-, width=\textwidth, delta=0 0, offset=0 0px]{mongodb.pdf}
+	%\includepdf[keepaspectratio=true, pages=-, width=\textwidth, delta=0 0, offset=0 0pt]{mongodb.pdf}
 
 
 \end{document}

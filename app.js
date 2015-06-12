@@ -37,11 +37,16 @@ app.post("/pdf", function (req, res) {
 
   fs.writeFile('aaa.png', src, 'base64', function(err) {
       assert.equal(null, err);
+      var px = 72.27/72;
+      data.pdfWidth *= px;
+      data.pdfHeight *= px;
       var scale = data.pdfWidth/data.pageWidth;
       var X=data.offLeft*scale;
       var Y=data.offTop*scale;
       var W=data.imgWidth*scale;
-      exec('pdflatex "\\def\\WIDTH{'+data.pdfWidth+'px} \\def\\HEIGHT{'+data.pdfHeight+'px} \\def\\X{'+X+'px} \\def\\Y{'+Y+'px} \\def\\W{'+W+'px} \\def\\IMG{'+'aaa.png'+'} \\input{imagela.tex}"', function(err,stdout,stderr){
+      var cmd = 'xelatex "\\def\\WIDTH{'+data.pdfWidth+'pt} \\def\\HEIGHT{'+data.pdfHeight+'pt} \\def\\X{'+X+'pt} \\def\\Y{'+Y+'pt} \\def\\W{'+W+'pt} \\def\\IMG{'+'aaa.png'+'} \\input{imagela.tex}"';
+      console.log(cmd);
+      exec(cmd, function(err,stdout,stderr){
         console.log(stderr);
         genPDF("font", 'imagela', 1, "out");
       });
