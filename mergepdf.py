@@ -9,25 +9,25 @@ import getopt
 # yum install -y xpdf pdftk poppler-utils
 # pdftotext a.pdf a.txt
 
-def mergePDF(inpath, imgpath, outpath):
+def mergePDF(inpath, imgpath, p, outpath):
     content = []
     inFile = open(inpath, "rb")
+    p-=1
     # overlay = open(imgpath, "rb")
     with open(imgpath, "rb") as overlay:
+
         original = pypdf.PdfFileReader(inFile)
-        background = original.getPage(0)
         foreground = pypdf.PdfFileReader(overlay).getPage(0)
 
-        # merge the first two pages
+        background = original.getPage(p)
         background.mergePage(foreground)
-        content.append(background.extractText().encode('utf-8').replace("\xa0", " "))
 
         # add all pages to a writer
         writer = pypdf.PdfFileWriter()
         for i in range(original.getNumPages()):
             page = original.getPage(i)
             writer.addPage(page)
-            content.append(page.extractText().encode('utf-8').replace("\xa0", " "))
+            #content.append(page.extractText().encode('utf-8').replace("\xa0", " "))
 
         # write everything in the writer to a file
         with open(outpath, "wb") as outFile:
@@ -41,8 +41,10 @@ def main(argv):
     inputfile = ''
     outputfile = ''
     markfile = ''
+    page=1
+
     try:
-        opts, args = getopt.getopt(argv,"hi:m:o:",["in=", "mark=", "out="])
+        opts, args = getopt.getopt(argv,"hi:m:p:o:",["in=", "mark=", "page=", "out="])
     except getopt.GetoptError:
         print 'test.py -i <inputfile> -o <outputfile>'
         sys.exit(2)
@@ -54,11 +56,13 @@ def main(argv):
             inputfile = arg
         elif opt in ("-m", "--mark"):
             markfile = arg
+        elif opt in ("-p", "--page"):
+            page = int(arg)
         elif opt in ("-o", "--out"):
             outputfile = arg
     # print inputfile, markfile, outputfile
     if inputfile and markfile and outputfile:
-        mergePDF(inputfile, markfile, outputfile)
+        mergePDF(inputfile, markfile, page, outputfile)
     else:
         print "arguments error."
 

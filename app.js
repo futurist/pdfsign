@@ -48,7 +48,7 @@ app.post("/pdf", function (req, res) {
       console.log(cmd);
       exec(cmd, function(err,stdout,stderr){
         console.log(stderr);
-        genPDF("font", 'imagela', 1, "out");
+        genPDF("font", 'imagela', data.page, "out");
       });
   });
 });
@@ -126,9 +126,9 @@ function _logErr () {
     if(arguments[i]) process.stderr.write(arguments[i]);
 }
 
-function genPDF ( infile, imagefile, scale, outfile ) {
+function genPDF ( infile, imagefile, page, outfile ) {
 
-  exec('./mergepdf.py -i '+ infile +'.pdf -m '+imagefile+'.pdf -o '+ outfile +'.pdf ', function (error, stdout, stderr) {
+  exec('./mergepdf.py -i '+ infile +'.pdf -m '+imagefile+'.pdf -p '+page+' -o '+ outfile +'.pdf ', function (error, stdout, stderr) {
     console.log(error,stdout, stderr);
   });
 

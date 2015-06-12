@@ -114,6 +114,16 @@
       background: #e3e3e3;
       text-decoration: none;
     }
+    .noselect {
+       -webkit-touch-callout: none;
+       -webkit-user-select: none;
+       -khtml-user-select: none;
+       -moz-user-select: none;
+       -ms-user-select: none;
+       user-select: none;
+       outline: none;
+       -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
+    }
   </style>
 
   <link rel="stylesheet" href="build/components/pdf_viewer.css">
@@ -283,6 +293,7 @@
 
 
   var keys = {37: 1, 38: 1, 39: 1, 40: 1};
+  var screenLocked = false;
 
   function preventDefault(e) {
     e = e || window.event;
@@ -307,6 +318,8 @@
     document.ontouchmove  = preventDefault; // mobile
     document.onkeydown  = preventDefaultForScrollKeys;
     el.onkeydown  = preventDefaultForScrollKeys;
+    screenLocked = true;
+    el.classList.add('noselect');
   }
 
   function enableScroll() {
@@ -318,11 +331,14 @@
       document.ontouchmove = null;
       document.onkeydown = null;
       el.onkeydown = null;
+      screenLocked = false;
+      el.classList.remove('noselect');
   }
   //disableScroll( document.querySelector('#viewerContainer') );
 
 
-  var DEFAULT_URL = 'font.pdf';
+  var DEFAULT_URL = 'web/compressed.tracemonkey-pldi-09.pdf';
+  //DEFAULT_URL='font.pdf';
   var DEFAULT_SCALE_DELTA = 1.1;
   var MIN_SCALE = 0.25;
   var MAX_SCALE = 10.0;
@@ -697,7 +713,7 @@ var PDFViewerApplication = {
       }
 
       if (pdfTitle) {
-        self.setTitle(pdfTitle + ' - ' + document.title);
+        //self.setTitle(pdfTitle + ' - ' + document.title);
       }
 
       if (info.IsAcroFormPresent) {
@@ -828,21 +844,25 @@ function webViewerInitialized() {
 
   document.getElementById('previous').addEventListener('click',
     function() {
+      if(screenLocked)return;
       PDFViewerApplication.page--;
     });
 
   document.getElementById('next').addEventListener('click',
     function() {
+      if(screenLocked)return;
       PDFViewerApplication.page++;
     });
 
   document.getElementById('zoomIn').addEventListener('click',
     function() {
+      if(screenLocked)return;
       PDFViewerApplication.zoomIn();
     });
 
   document.getElementById('zoomPage').addEventListener('click',
     function() {
+      if(screenLocked)return;
       var z1=this.querySelectorAll('span')[0];
       var z2=this.querySelectorAll('span')[1];
       var obj;
@@ -861,6 +881,7 @@ function webViewerInitialized() {
 
   document.getElementById('zoomOut').addEventListener('click',
     function() {
+      if(screenLocked)return;
       PDFViewerApplication.zoomOut();
     });
 
@@ -868,7 +889,11 @@ function webViewerInitialized() {
     this.select();
   });
 
-  document.getElementById('pageNumber').addEventListener('change', function() {
+  document.getElementById('pageNumber').addEventListener('change', function(e) {
+    if(screenLocked){
+      e.preventDefault();
+      return;
+    }
     // Handle the user inputting a floating point number.
     PDFViewerApplication.page = (this.value | 0);
 
@@ -1124,7 +1149,7 @@ window.addEventListener('mousewheel', handleMouseWheel);
 
 
 window.addEventListener('keydown', function keydown(evt) {
-  if (OverlayManager.active) {
+  if (OverlayManager.active || screenLocked) {
     return;
   }
 
@@ -1490,7 +1515,7 @@ window.addEventListener('afterprint', function afterPrint(evt) {
           url:'http://1111hui.com:3000/pdf',
           type:'POST',
           //contentType:'application/json',
-          data:{type:"img", src:dataURL, imgWidth:canvas2.width, imgHeight:canvas2.height, pageWidth:page.width(), pageHeight:page.height(),pdfWidth:pdfWidth, pdfHeight:pdfHeight, offLeft:offLeft, offTop:offTop },
+          data:{type:"img", page:pageView.id, src:dataURL, imgWidth:canvas2.width, imgHeight:canvas2.height, pageWidth:page.width(), pageHeight:page.height(),pdfWidth:pdfWidth, pdfHeight:pdfHeight, offLeft:offLeft, offTop:offTop },
           success:function  (data, status, xhr) {
             console.log(status);
           },
@@ -1536,6 +1561,7 @@ window.addEventListener('afterprint', function afterPrint(evt) {
 
 $('.remark').on('click',function  (e) {
   $('#drawer').show();
+  disableScroll( document.querySelector('#viewerContainer') );
   init();
 });
 
